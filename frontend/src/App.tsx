@@ -8,7 +8,7 @@ function App() {
   return (
     <div className="App h-screen">
       <Header></Header>
-      {/* <Gameslist></Gameslist> */}
+      <Gameslist></Gameslist>
     </div>
   );
 }
