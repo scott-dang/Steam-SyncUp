@@ -5,10 +5,11 @@ Steam SyncUp enables users to find and join a game community, tailored to their 
 
 This project is divided into a frontend folder that is hosted on Amplify and a backend folder that will contain the code for our Lambda Functions as part of our serverless approach.
 
-Inside the frontend folder, it will contain everything frontend related from all the React components, to hooks, frontend testing, and the CSS.<br>
+Inside the **frontend** folder, it will contain everything frontend related from all the React components, to hooks, frontend testing, and the CSS.
 By itself, a person should be able to spin up a local version of our web app.
 
-Inside the backend folder, it will contain anything backend related like all the code for Lambda Functions including interfaces of database models, and any testing.
+Inside the **backend** folder, it will contain all backend code that run on our Lambda Functions.
+Refer to its own directory's README [here](backend/README.md) for more details.
 
 ## Requirements
 
