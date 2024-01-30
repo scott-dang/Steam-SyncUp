@@ -1,15 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import Header from './components/header';
-import Gameslist from './components/gameslist';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Lobbies from './pages/Lobbies';
+import Landing from './pages/Landing';
+import Settings from './pages/Settings';
+
 
 function App() {
   return (
-    <div className="App h-screen">
-      <Header></Header>
-      <Gameslist></Gameslist>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="lobbies" element={<Lobbies />} />
+        <Route path="settings" element={<Settings />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
