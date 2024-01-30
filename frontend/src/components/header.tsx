@@ -15,7 +15,7 @@ export default function Header() {
                     type="text"
                     placeholder="Search"
                     className="text-white text-2xl bg-transparent border border-white rounded-full px-4 py-2 text-center focus:outline-none"
-                    style={{ width: "800px", color: "black" }} // Adjust width
+                    style={{ width: "1/2vw", color: "black" }} // Adjust width
                 />
             </div>
             <p className="text-white text-2xl ml-10">
