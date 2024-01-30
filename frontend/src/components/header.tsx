@@ -7,9 +7,9 @@ export default function Header() {
             <p className="text-white text-3xl">
                 Steam SyncUp
             </p>
-            <p className="text-white text-2xl">
+            <a className="text-white text-2xl">
                 Lobbies
-            </p>
+            </a>
             <div className="relative ml-10">
                 <input
                     type="text"

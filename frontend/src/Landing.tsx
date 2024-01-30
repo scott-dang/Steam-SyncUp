@@ -4,13 +4,13 @@ import './App.css';
 import Header from './components/header';
 import Gameslist from './components/gameslist';
 
-function App() {
+function Landing() {
   return (
     <div className="App h-screen">
       <Header></Header>
-      <Gameslist></Gameslist>
+      {/* <Gameslist></Gameslist> */}
     </div>
   );
 }
 
-export default App;
+export default Landing;
