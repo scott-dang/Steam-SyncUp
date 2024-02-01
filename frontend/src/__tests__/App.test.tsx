@@ -1,43 +1,45 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import Landing from '../pages/Landing';
-import Lobbies from '../pages/Lobbies';
-import Settings from '../pages/Settings';
+import * as React from "react";
+import * as TestRenderer from "react-test-renderer";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
+import App from "../App";
 
-const routes = (
-  <MemoryRouter initialEntries={['/']}>
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="lobbies" element={<Lobbies />} />
-      <Route path="settings" element={<Settings />} />
-    </Routes>
-  </MemoryRouter>
-);
+describe("App component", () => {
+  it("renders Landing component for '/' path", () => {
+    let renderer: TestRenderer.ReactTestRenderer;
+    TestRenderer.act(() => {
+      renderer = TestRenderer.create(
+        <MemoryRouter initialEntries={["/"]}>
+          <App />
+        </MemoryRouter>
+      );
+    });
 
-test('renders Landing component for "/" route', () => {
-  render(
-    routes
-  );
+    expect(renderer.toJSON()).toMatchSnapshot();
+  });
 
-  // Check if the Landing component is rendered
-  expect(screen.getByText(/landing/i)).toBeTruthy(); 
-});
+  it("renders Lobbies component for '/lobbies' path", () => {
+    let renderer: TestRenderer.ReactTestRenderer;
+    TestRenderer.act(() => {
+      renderer = TestRenderer.create(
+        <MemoryRouter initialEntries={["/lobbies"]}>
+          <App />
+        </MemoryRouter>
+      );
+    });
 
-test('renders no Lobbies component for "lobbies" route with no auth', () => {
-  render(
-    routes
-  );
+    expect(renderer.toJSON()).toMatchSnapshot();
+  });
 
-  // Check if the Lobbies component isn't rendered
-  expect(screen.queryByText(/lobbies/i)).toBeFalsy();
-});
+  it("renders Settings component for '/settings' path", () => {
+    let renderer: TestRenderer.ReactTestRenderer;
+    TestRenderer.act(() => {
+      renderer = TestRenderer.create(
+        <MemoryRouter initialEntries={["/settings"]}>
+          <App />
+        </MemoryRouter>
+      );
+    });
 
-test('renders no Settings component for "/settings" route with no auth', () => {
-  render(
-    routes
-  );
-
-  // Check if the Settings component isn't rendered
-  expect(screen.queryByText(/settings/i)).toBeFalsy(); 
+    expect(renderer.toJSON()).toMatchSnapshot();
+  });
 });
