@@ -1,4 +1,5 @@
 import '../App.css';
+import React from 'react';
 import SteamButton from './steam_button.png'
 import { Link } from 'react-router-dom';
 
@@ -23,7 +24,7 @@ export default function Header() {
                 <Link to="/settings">Settings</Link>
             </p>
 
-            <a href={'https://store.steampowered.com/'} target="_blank" rel="noreferrer">
+            <a href={'https://store.steampowered.com/'} target="_blank" rel="noopener noreferrer">
                 <img src={SteamButton} alt={""}></img>
             </a>
         </div>

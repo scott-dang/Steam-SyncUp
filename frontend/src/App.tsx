@@ -1,5 +1,6 @@
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React from 'react';
 import Lobbies from './pages/Lobbies';
 import Landing from './pages/Landing';
 import Settings from './pages/Settings';
