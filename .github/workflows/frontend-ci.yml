@@ -19,7 +19,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '19.2.0'
+        node-version: '16.12.0'
 
     - name: Build and Test Frontend
       run: ./.github/workflows/scripts/frontend-build.sh
