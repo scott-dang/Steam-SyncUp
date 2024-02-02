@@ -22,4 +22,4 @@ jobs:
         go-version: '1.21.4'
 
     - name: Build and Test Backend
-      run: ./workflows/scripts/backend-build.sh
+      run: ./.github/workflows/scripts/backend-build.sh
