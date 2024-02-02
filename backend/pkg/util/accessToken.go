@@ -30,40 +30,38 @@ func CreateUserToken(uuid string, context context.Context) (string, error) {
 		return "", err
 	}
 
+	addTokenToUser(uuid, tokenString, context)
+
 	return tokenString, nil
 }
 
-// TODO: update the user so that they have the new token
+func addTokenToUser(uuid string, tokenString string, context context.Context) error {
+	config, err := config.LoadDefaultConfig(context)
+	client := dynamodb.NewFromConfig(config)
 
-// func addTokenToUser(uuid string, tokenString string, context context.Context) error {
-// 	config, err := config.LoadDefaultConfig(context)
-// 	client := dynamodb.NewFromConfig(config)
+	if err != nil {
+		return err
+	}
 
-// 	if err != nil {
-// 		return err
-// 	}
+	if err != nil {
+		return err
+	}
 
-// 	update := expression.Set(expression.Name("Token"), expression.Value(tokenString));
-// 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String("Users"),
+		Key: map[string]types.AttributeValue{
+			"SteamUUID": &types.AttributeValueMemberS{Value: uuid},
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":t": &types.AttributeValueMemberS{Value: tokenString},
+		},
+		UpdateExpression: aws.String("SET Token = :t"),
+	}
 
-// 	if err != nil {
-// 		return err
-// 	}
+	_, err = client.UpdateItem(context, input)
 
-// 	input := &dynamodb.UpdateItemInput{
-// 		TableName: aws.String("Users"),
-// 		Key: map[string]types.AttributeValue{
-// 			"SteamUUID": &types.AttributeValueMemberS{Value: uuid},
-// 		},
-// 		ExpressionAttributeNames: expr.Names(),
-// 		ExpressionAttributeValues: expr.Values(),
-// 		UpdateExpression: expr.Update(),
-// 	}
-
-// 	_, err = client.UpdateItem(context, input)
-
-// 	return err
-// }
+	return err
+}
 
 func GetUserFromToken(tokenString string, context context.Context) (model.User, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
