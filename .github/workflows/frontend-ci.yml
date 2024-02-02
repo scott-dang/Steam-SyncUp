@@ -21,5 +21,5 @@ jobs:
       with:
         node-version: '19.2.0'
 
-    - name: Build and Test Backend
+    - name: Build and Test Frontend
       run: ./.github/workflows/scripts/frontend-build.sh
