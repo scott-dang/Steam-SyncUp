@@ -1,6 +1,6 @@
 import '../App.css';
 import SteamButton from './steam_button.png'
-import { Outlet, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function Header() {
     return (
@@ -8,7 +8,7 @@ export default function Header() {
             <p className="text-white text-3xl">
                 <Link to="/">Steam SyncUp</Link>
             </p>
-        <a className="text-white text-2xl">
+        <a className="text-white text-2xl" href={"/#"}>
             <Link to="/lobbies">Lobbies</Link>
         </a>
             <div className="relative ml-10">
@@ -23,8 +23,8 @@ export default function Header() {
                 <Link to="/settings">Settings</Link>
             </p>
 
-            <a href={'https://store.steampowered.com/'} target="_blank">
-                <img src={SteamButton} ></img>
+            <a href={'https://store.steampowered.com/'} target="_blank" rel="noreferrer">
+                <img src={SteamButton} alt={""}></img>
             </a>
         </div>
     );
