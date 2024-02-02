@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -14,38 +15,18 @@ import (
 )
 
 type UserClaims struct {
-	uuid string
+	UUID string
 	jwt.RegisteredClaims
 }
 
-func CreateUserToken(uuid string, context context.Context) (string, error) {
-	claims := UserClaims{
-		uuid: uuid,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-
-	tokenString, err := token.SignedString([]byte("mySecret"))
-	if err != nil {
-		return "", err
-	}
-
-	addTokenToUser(uuid, tokenString, context)
-
-	return tokenString, nil
-}
-
-func addTokenToUser(uuid string, tokenString string, context context.Context) error {
+var addTokenToUser = func(uuid string, tokenString string, context context.Context) error {
 	config, err := config.LoadDefaultConfig(context)
+
+	if err != nil {
+		return err
+	}
+
 	client := dynamodb.NewFromConfig(config)
-
-	if err != nil {
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
 
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Users"),
@@ -63,30 +44,27 @@ func addTokenToUser(uuid string, tokenString string, context context.Context) er
 	return err
 }
 
-func GetUserFromToken(tokenString string, context context.Context) (model.User, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("mySecret"), nil
-	})
-	if err != nil {
-		return model.User{}, err
-	} else if claims, ok := token.Claims.(*UserClaims); ok {
-		uuid := claims.uuid
-		user, err := getUser(uuid, context)
-		if err != nil {
-			return model.User{}, err
-		}
-
-		if user.Token != tokenString {
-			return model.User{}, fmt.Errorf("invalid token")
-		}
-
-		return user, nil
-	} else {
-		return model.User{}, fmt.Errorf("invalid token")
+func CreateUserToken(uuid string, context context.Context) (string, error) {
+	claims := UserClaims{
+		uuid,
+		jwt.RegisteredClaims{
+			IssuedAt: jwt.NewNumericDate(time.Now()),
+		},
 	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString([]byte("mySecret"))
+	if err != nil {
+		return "", err
+	}
+
+	addTokenToUser(uuid, tokenString, context)
+
+	return tokenString, nil
 }
 
-func getUser(uuid string, context context.Context) (model.User, error) {
+var getUser = func(uuid string, context context.Context) (model.User, error) {
 	config, err := config.LoadDefaultConfig(context)
 	client := dynamodb.NewFromConfig(config)
 
@@ -111,4 +89,32 @@ func getUser(uuid string, context context.Context) (model.User, error) {
 	err = attributevalue.UnmarshalMap(response.Item, &user)
 
 	return user, err
+}
+
+var validToken = func(found string, expected string) bool {
+	return found == expected
+}
+
+func GetUserFromToken(tokenString string, context context.Context) (model.User, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("mySecret"), nil
+	})
+	if err != nil {
+		return model.User{}, err
+	} else if claims, ok := token.Claims.(*UserClaims); ok {
+		uuid := claims.UUID
+		print("This is the uuid" + claims.UUID)
+		user, err := getUser(uuid, context)
+		if err != nil {
+			return model.User{}, err
+		}
+
+		if !validToken(tokenString, user.Token) {
+			return model.User{}, fmt.Errorf("invalid token")
+		}
+
+		return user, nil
+	} else {
+		return model.User{}, fmt.Errorf("invalid token")
+	}
 }
