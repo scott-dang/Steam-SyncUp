@@ -4,6 +4,9 @@ import Lobbies from './pages/Lobbies';
 import Landing from './pages/Landing';
 import Settings from './pages/Settings';
 
+export function addition(a: number, b: number) {
+  return a + b;
+}
 
 function App() {
   return (
