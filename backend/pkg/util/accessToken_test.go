@@ -40,7 +40,7 @@ func TestGetUserFromToken(t *testing.T) {
 		return nil
 	}
 
-	uuidValue := "This is my UUID"
+	uuidValue := "This is my test UUID"
 
 	tokenString, _ := CreateUserToken(uuidValue, nil)
 
