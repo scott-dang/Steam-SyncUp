@@ -2,6 +2,19 @@ import '../App.css';
 import SteamButton from './steam_button.png'
 import { Link } from 'react-router-dom';
 import React from 'react';
+import { getBaseUrl } from '../utilities';
+
+const url: URL = new URL("https://steamcommunity.com/openid/login")
+url.search = new URLSearchParams({
+  'openid.ns': 'http://specs.openid.net/auth/2.0',
+  'openid.claimed_id': 'http://specs.openid.net/auth/2.0/identifier_select',
+  'openid.identity': 'http://specs.openid.net/auth/2.0/identifier_select',
+  'openid.return_to': getBaseUrl() + "/auth",
+  'openid.realm': getBaseUrl() + "/auth",
+  'openid.mode': 'checkid_setup'
+}).toString()
+
+const urlString: string = url.toString()
 
 export default function Header() {
     return (
@@ -24,7 +37,7 @@ export default function Header() {
                 <Link to="/settings">Settings</Link>
             </p>
 
-            <a href={'https://store.steampowered.com/'} target="_blank" rel="noreferrer">
+            <a href={urlString} target="_blank" rel="noreferrer">
                 <img src={SteamButton} alt={""}></img>
             </a>
         </div>
