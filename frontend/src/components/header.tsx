@@ -1,6 +1,7 @@
 import '../App.css';
 import SteamButton from './steam_button.png'
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 export default function Header() {
     return (
