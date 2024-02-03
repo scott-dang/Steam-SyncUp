@@ -15,6 +15,8 @@ Refer to its own directory's README [here](backend/README.md) for more details.
 
 ## Local Installation
 
+To install a local instance of Steam-SyncUp, refer to the frontend directory's README [here](frontend/README.md) for more details.
+
 ## Configuration
 
 ## Troubleshooting & FAQ
