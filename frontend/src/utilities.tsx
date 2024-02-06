@@ -6,8 +6,7 @@ export const isLocalHost = (): boolean => {
 
 export const getBaseUrl = (): String => {
   const urlOrigin: String = window.location.origin;
-
-  return isLocalHost() ? urlOrigin : "https://" + urlOrigin;
+  return urlOrigin;
 }
 
 export const authServiceEndpointURL: URL = new URL("https://og8ukicoij.execute-api.us-west-2.amazonaws.com/default/auth");
