@@ -22,9 +22,9 @@ export default function Header() {
             <p className="text-white text-3xl">
                 <Link to="/">Steam SyncUp</Link>
             </p>
-        <a className="text-white text-2xl" href={"/#"}>
-            <Link to="/lobbies">Lobbies</Link>
-        </a>
+            <a className="text-white text-2xl" href={"/#"}>
+                <Link to="/lobbies">Lobbies</Link>
+            </a>
             <div className="relative ml-10">
                 <input
                     type="text"
@@ -37,7 +37,7 @@ export default function Header() {
                 <Link to="/settings">Settings</Link>
             </p>
 
-            <a href={urlString} target="_blank" rel="noreferrer">
+            <a href={urlString} target="_self" rel="noreferrer">
                 <img src={SteamButton} alt={""}></img>
             </a>
         </div>
