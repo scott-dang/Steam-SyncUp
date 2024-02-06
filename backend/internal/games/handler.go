@@ -11,7 +11,7 @@ import (
 )
 
 type GamesServiceResponseBody struct {
-	Authenticated bool `json:"authenticated"`
+	Authenticated string `json:"authenticated"`
 }
 
 func Handler(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -25,13 +25,17 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	token := split[1]
 
 	body := GamesServiceResponseBody{
-		Authenticated: true,
+		Authenticated: "Yes",
 	}
 
-	_, err := util.GetUserFromToken(token, context)
+	user, err := util.GetUserFromToken(token, context)
 
 	if err != nil {
-		body.Authenticated = false
+		body.Authenticated = "No user from token"
+	}
+
+	if user.Token != token {
+		body.Authenticated = "No, mismatched token"
 	}
 
 	responseBody, err := json.Marshal(body)
