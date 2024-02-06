@@ -21,10 +21,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/scott-dang/Steam-SyncUp/pkg/model"
+	"github.com/scott-dang/Steam-SyncUp/pkg/util"
 )
 
 type AuthServiceResponseBody struct {
 	IsValid bool `json:"is_valid"`
+	Token string `json:"token"`
 }
 
 // extractID extracts the Steam UUID from a Steam OpenID URL
@@ -89,6 +91,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	bs := string(body)
 
 	is_valid := strings.Contains(bs, "true")
+	token := ""
 
 	// Logs to CloudWatch for debugging
 	log.Println("SteamVerifyURL: " + steamVerifyURL + "\nIs user validated? " + strconv.FormatBool(is_valid))
@@ -133,10 +136,18 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 				StatusCode: http.StatusInternalServerError,
 			}, err
 		}
+
+		token, err = util.CreateUserToken(id, context)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, err
+		}
 	}
 
 	responseBody, err := json.Marshal(AuthServiceResponseBody{
 		IsValid: is_valid,
+		Token: token,
 	})
 
 	if err != nil {
