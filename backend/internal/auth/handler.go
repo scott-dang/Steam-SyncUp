@@ -26,7 +26,7 @@ import (
 
 type AuthServiceResponseBody struct {
 	IsValid bool `json:"is_valid"`
-	Token string `json:"token"`
+	JWTToken string `json:"jwttoken"`
 }
 
 // extractID extracts the Steam UUID from a Steam OpenID URL
@@ -147,7 +147,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 
 	responseBody, err := json.Marshal(AuthServiceResponseBody{
 		IsValid: is_valid,
-		Token: token,
+		JWTToken: token,
 	})
 
 	if err != nil {

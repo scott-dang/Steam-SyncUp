@@ -3,8 +3,10 @@ package util
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -36,7 +38,7 @@ var addTokenToUser = func(uuid string, tokenString string, context context.Conte
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":t": &types.AttributeValueMemberS{Value: tokenString},
 		},
-		UpdateExpression: aws.String("SET Token = :t"),
+		UpdateExpression: aws.String("SET JWTToken = :t"),
 	}
 
 	_, err = client.UpdateItem(context, input)
@@ -59,9 +61,9 @@ func CreateUserToken(uuid string, context context.Context) (string, error) {
 		return "", err
 	}
 
-	addTokenToUser(uuid, tokenString, context)
+	err = addTokenToUser(uuid, tokenString, context)
 
-	return tokenString, nil
+	return tokenString, err
 }
 
 var getUser = func(uuid string, context context.Context) (model.User, error) {
@@ -95,6 +97,18 @@ var validToken = func(found string, expected string) bool {
 	return found == expected
 }
 
+func Authenticate(request events.APIGatewayProxyRequest, context context.Context) (model.User, error) {
+	split := strings.Split(request.Headers["authorization"], "Bearer ")
+	
+	if len(split) != 2 {
+		return model.User{}, fmt.Errorf("no token")
+	}
+	
+	token := split[1]
+
+	return GetUserFromToken(token, context)
+}
+
 func GetUserFromToken(tokenString string, context context.Context) (model.User, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("mySecret"), nil
@@ -103,13 +117,12 @@ func GetUserFromToken(tokenString string, context context.Context) (model.User, 
 		return model.User{}, err
 	} else if claims, ok := token.Claims.(*UserClaims); ok {
 		uuid := claims.UUID
-		print("This is the uuid" + claims.UUID)
 		user, err := getUser(uuid, context)
 		if err != nil {
 			return model.User{}, err
 		}
 
-		if !validToken(tokenString, user.Token) {
+		if !validToken(tokenString, user.JWTToken) {
 			return model.User{}, fmt.Errorf("invalid token")
 		}
 
