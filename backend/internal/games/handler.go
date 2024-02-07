@@ -20,11 +20,11 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 
 	body := GamesServiceResponseBody{
 		Authenticated: false,
-		UUID: user.SteamUUID,
 	}
 
 	if err == nil {
 		body.Authenticated = true
+		body.UUID = user.SteamUUID
 	}
 
 	responseBody, _ := json.Marshal(body)
