@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import React from 'react';
 import Header from '../components/header';
 
 test('renders Header component with links and search input', () => {
@@ -23,4 +24,4 @@ test('renders Header component with links and search input', () => {
  
    // Check if the SteamButton image is present
    expect(screen.getByRole('link', { name: 'Steam SyncUp' })).toBeTruthy();
-}); 
+});
