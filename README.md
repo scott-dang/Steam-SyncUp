@@ -1,6 +1,6 @@
 ![Backend Status](https://github.com/scott-dang/Steam-SyncUp/actions/workflows/backend-ci.yml/badge.svg)
 ![Frontend Status](https://github.com/scott-dang/Steam-SyncUp/actions/workflows/frontend-ci.yml/badge.svg)
-<Reminder to get coverage badge up and running and insert here>
+[![codecov](https://codecov.io/gh/scott-dang/Steam-SyncUp/graph/badge.svg?token=JZ3V32WSWM)](https://codecov.io/gh/scott-dang/Steam-SyncUp)
 
 # Steam-SyncUp
 Steam SyncUp enables users to find and join a game community, tailored to their specific game. By linking their Steam account, users can discuss, chat, and meet new users through the chat room feature. Users will also be able to find new games to play, discuss and learn about new content relevant to the game, and find others to play games together with one another.
