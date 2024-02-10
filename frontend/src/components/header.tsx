@@ -57,10 +57,12 @@ export default function Header() {
 
   return (
     <div className="flex justify-between items-center pt-10 px-10 pb-10 bg-[#222222]">
-      <p className="text-white text-3xl">
-        <Link to="/">Steam SyncUp</Link>
-      </p>
-      <Link className="text-white text-2xl" to="/lobbies">Lobbies</Link>
+      <Link className="text-white text-3xl cursor-pointer" to="/">
+        Steam SyncUp
+      </Link>
+      <Link className="text-white text-2xl cursor-pointer" to="/lobbies">
+        Lobbies
+      </Link>
       {location.pathname === "/lobbies" && 
         <div className="relative ml-10 w-2/5">
           <form method="get" onSubmit={onSearchSubmit} className="w-full">
@@ -109,11 +111,11 @@ export default function Header() {
           )}
         </div>
       }
-      <p className="text-white text-2xl ml-10">
-        <Link to="/settings">Settings</Link>
-      </p>
+      <Link className="text-white text-2xl ml-10" to="/settings">
+        Settings
+      </Link>
 
-      <a href={steamOpenIdEndpointUrl.toString()} target="_self" rel="noreferrer">
+      <a href={steamOpenIdEndpointUrl().toString()} target="_self" rel="noreferrer">
         <img src={SteamButton} alt={""}></img>
       </a>
     </div>
