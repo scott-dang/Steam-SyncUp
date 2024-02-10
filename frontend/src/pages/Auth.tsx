@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MoonLoader } from 'react-spinners';
 import Header from '../components/header';
-import { authServiceEndpointURL } from '../utilities';
+import { authServiceEndpointURL, fetchUserOwnedGames, Game } from '../utilities';
 
 const authEndpointParams: URLSearchParams = new URLSearchParams(window.location.search);
 
@@ -12,22 +12,34 @@ function Auth() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-
+  const fetchAuthenticationStatus = async () => {
     const authEndpointURLWithParams: URL = authServiceEndpointURL;
     authEndpointParams.set("openid.mode", "check_authentication");
     authServiceEndpointURL.search = authEndpointParams.toString();
 
     setIsLoading(true);
 
-    fetch(authEndpointURLWithParams).then((resp) => {
-      resp.json().then((data) => {
-        if (data.is_valid === true) {
-          navigate("/lobbies");
-          alert("Logged in successfully!");
-        }
-      })
-    });
+    const resp = await fetch(authEndpointURLWithParams);
+    const data = await resp.json();
+
+    return data;
+  }
+
+  useEffect(() => {
+
+    (async () => {
+      const data = await fetchAuthenticationStatus();
+
+      if (data.is_valid === true) {
+        navigate("/lobbies");
+        localStorage.setItem("jwttoken", data.jwttoken);
+
+        // Store user games upon sign-in
+        const games: Game[] = await fetchUserOwnedGames();
+        localStorage.setItem("games", JSON.stringify(games));
+        alert("Logged in successfully!");
+      }
+    })();
 
     const authTimeout = setTimeout(() => {
       setIsLoading(false);
