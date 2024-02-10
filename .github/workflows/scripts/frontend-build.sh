@@ -21,8 +21,8 @@ echo -e "Building\n"
 npm run build
 
 # Testing
-echo -e "Running tests\n"
-npm run test
+echo -e "Running tests with coverage\n"
+npm run test:coverage
 
 echo "--------------------------"
 echo "Finished workflow on Frontend"
