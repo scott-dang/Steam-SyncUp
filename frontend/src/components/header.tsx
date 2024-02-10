@@ -2,7 +2,7 @@ import '../App.css';
 import SteamButton from './steam_button.png'
 import { Link, useLocation } from 'react-router-dom';
 import React, { FormEvent, useState } from 'react';
-import { fetchUserOwnedGames, Game, gamesServiceEndpointURL, GamesServiceResponse, ListOfGames, steamOpenIdEndpointUrl } from '../utilities';
+import { fetchUserOwnedGames, Game, steamOpenIdEndpointUrl } from '../utilities';
 
 export default function Header() {
 
