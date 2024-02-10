@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MoonLoader } from 'react-spinners';
 import Header from '../components/header';
-import { authServiceEndpointURL } from '../utilities';
+import { authServiceEndpointURL, fetchUserOwnedGames, Game } from '../utilities';
 
 const authEndpointParams: URLSearchParams = new URLSearchParams(window.location.search);
 
@@ -32,6 +32,11 @@ function Auth() {
 
       if (data.is_valid === true) {
         navigate("/lobbies");
+        localStorage.setItem("jwttoken", data.jwttoken);
+
+        // Store user games upon sign-in
+        const games: Game[] = await fetchUserOwnedGames();
+        localStorage.setItem("games", JSON.stringify(games));
         alert("Logged in successfully!");
       }
     })();

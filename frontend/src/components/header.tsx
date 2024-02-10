@@ -2,7 +2,7 @@ import '../App.css';
 import SteamButton from './steam_button.png'
 import { Link, useLocation } from 'react-router-dom';
 import React, { FormEvent, useState } from 'react';
-import { Game, gamesServiceEndpointURL, GamesServiceResponse, ListOfGames, steamOpenIdEndpointUrl } from '../utilities';
+import { fetchUserOwnedGames, Game, gamesServiceEndpointURL, GamesServiceResponse, ListOfGames, steamOpenIdEndpointUrl } from '../utilities';
 
 export default function Header() {
 
@@ -17,22 +17,12 @@ export default function Header() {
     e.preventDefault();
 
     try {
-      const resp = await fetch(gamesServiceEndpointURL, {
-        // TODO: Ensure JWT is attached to the GET request
-      });
 
-      const data = await resp.json();
+      const games: Game[] = await fetchUserOwnedGames();
 
-      if (data.authenticated === true) {
+      localStorage.setItem("games", JSON.stringify(games));
 
-        const gamesServiceResponse: GamesServiceResponse = data;
-        const listOfGames: ListOfGames = gamesServiceResponse.list_of_games;
-        const games: Game[] = listOfGames.games;
-
-        sessionStorage.setItem("games", JSON.stringify(games))
-
-        onSearchChange(searchInput);
-      }
+      onSearchChange(searchInput);
 
     } catch (err) {
       console.error(err);
@@ -43,15 +33,28 @@ export default function Header() {
 
     setSearchInput(currentInput);
   
-    const searchResultsStr = sessionStorage.getItem("games");
+    const searchResultsStr: string = localStorage.getItem("games") || "[]";
 
     if (currentInput.length > 0 && searchResultsStr !== null) {
 
-      const searchResults = JSON.parse(searchResultsStr);
+      try {
 
-      setSearchResults(searchResults.filter(game => game.name.toLowerCase().startsWith(currentInput.toLowerCase())));
+        const searchResults: Game[] = JSON.parse(searchResultsStr) || [];
+
+        setSearchResults(searchResults.filter(
+          game => game.name.toLowerCase().startsWith(currentInput.toLowerCase())
+        ));
+
+      } catch (err) {
+
+        setSearchResults([]);
+        console.error(err);
+
+      }
     } else {
+
       setSearchResults([]);
+
     }
   }
 

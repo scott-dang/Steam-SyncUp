@@ -26,6 +26,32 @@ export const getBaseUrl = (): String => {
   return urlOrigin;
 }
 
+export const fetchUserOwnedGames = async (): Promise<Game[]> => {
+  try {
+    const resp = await fetch(gamesServiceEndpointURL, {
+      headers: {
+        "authorization": "Bearer " + localStorage.getItem("jwttoken") || "",
+      }
+    });
+
+    const data = await resp.json();
+
+    if (data.authenticated === true) {
+
+      const gamesServiceResponse: GamesServiceResponse = data;
+      const listOfGames: ListOfGames = gamesServiceResponse.list_of_games;
+      const games: Game[] = listOfGames.games;
+
+      return games;
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+
+  return[];
+}
+
 export const steamOpenIdEndpointUrl = (): URL => {
 
   const url: URL = new URL("https://steamcommunity.com/openid/login")
