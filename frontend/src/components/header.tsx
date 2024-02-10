@@ -1,45 +1,121 @@
 import '../App.css';
 import SteamButton from './steam_button.png'
-import { Link } from 'react-router-dom';
-import React from 'react';
-import { getBaseUrl } from '../utilities';
-
-const url: URL = new URL("https://steamcommunity.com/openid/login")
-url.search = new URLSearchParams({
-  'openid.ns': 'http://specs.openid.net/auth/2.0',
-  'openid.claimed_id': 'http://specs.openid.net/auth/2.0/identifier_select',
-  'openid.identity': 'http://specs.openid.net/auth/2.0/identifier_select',
-  'openid.return_to': getBaseUrl() + "/auth",
-  'openid.realm': getBaseUrl() + "/auth",
-  'openid.mode': 'checkid_setup'
-}).toString()
-
-const urlString: string = url.toString()
+import { Link, useLocation } from 'react-router-dom';
+import React, { FormEvent, useState } from 'react';
+import { Game, gamesServiceEndpointURL, GamesServiceResponse, ListOfGames, steamOpenIdEndpointUrl } from '../utilities';
 
 export default function Header() {
-    return (
-        <div className="flex justify-between items-center pt-10 px-10 pb-10 bg-[#222222]">
-            <p className="text-white text-3xl">
-                <Link to="/">Steam SyncUp</Link>
-            </p>
-            <a className="text-white text-2xl" href={"/#"}>
-                <Link to="/lobbies">Lobbies</Link>
-            </a>
-            <div className="relative ml-10">
-                <input
-                    type="text"
-                    placeholder="Search"
-                    className="text-white text-2xl bg-transparent border border-white rounded-full px-20 py-2 text-center focus:outline-none"
-                    style={{ width: "1/2vw", color: "white" }} // Adjust width
-                />
-            </div>
-            <p className="text-white text-2xl ml-10">
-                <Link to="/settings">Settings</Link>
-            </p>
 
-            <a href={urlString} target="_self" rel="noreferrer">
-                <img src={SteamButton} alt={""}></img>
-            </a>
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<Game[]>([]);
+
+  // Used to determine the route we are on and conditionally load certain features (i.e., search bar)
+  const location = useLocation();
+
+  const onSearchSubmit = async (e: FormEvent<HTMLFormElement>) => {
+
+    e.preventDefault();
+
+    try {
+      const resp = await fetch(gamesServiceEndpointURL, {
+        // TODO: Ensure JWT is attached to the GET request
+      });
+
+      const data = await resp.json();
+
+      if (data.authenticated === true) {
+
+        const gamesServiceResponse: GamesServiceResponse = data;
+        const listOfGames: ListOfGames = gamesServiceResponse.list_of_games;
+        const games: Game[] = listOfGames.games;
+
+        sessionStorage.setItem("games", JSON.stringify(games))
+
+        onSearchChange(searchInput);
+      }
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const onSearchChange = (currentInput: string) => {
+
+    setSearchInput(currentInput);
+  
+    const searchResultsStr = sessionStorage.getItem("games");
+
+    if (currentInput.length > 0 && searchResultsStr !== null) {
+
+      const searchResults = JSON.parse(searchResultsStr);
+
+      setSearchResults(searchResults.filter(game => game.name.toLowerCase().startsWith(currentInput.toLowerCase())));
+    } else {
+      setSearchResults([]);
+    }
+  }
+
+  return (
+    <div className="flex justify-between items-center pt-10 px-10 pb-10 bg-[#222222]">
+      <p className="text-white text-3xl">
+        <Link to="/">Steam SyncUp</Link>
+      </p>
+      <Link className="text-white text-2xl" to="/lobbies">Lobbies</Link>
+      {location.pathname === "/lobbies" && 
+        <div className="relative ml-10 w-2/5">
+          <form method="get" onSubmit={onSearchSubmit} className="w-full">
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full text-white text-2l bg-transparent border border-white rounded-xl px-6 py-2 text-center focus:outline-none"
+              style={{ color: "white" }} // Adjust width
+              onChange={(e) => onSearchChange(e.target.value)}
+              onFocus={(e) => {
+                e.target.placeholder = "Press ENTER to refresh the list";
+                // Reopen the dropdown with current input
+                onSearchChange(e.target.value);
+              }}
+              onBlur={(e) => {
+                e.target.placeholder = "Search";
+                // Close the dropdown
+                setSearchResults([]);
+              }}
+              value={searchInput}
+            />
+            <input type="submit" hidden/>
+          </form>
+
+          {searchResults.length > 0 && (
+            <div className="absolute z-10 w-full bg-white rounded-md shadow-lg">
+
+              {searchResults.slice(0,7) // Show max 7 games for the dropdown
+                            .map((game: Game, index) => (
+                <div
+                  key={index}
+                  className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-black hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    // Close the dropdown when clicking on a game from the dropdown
+                    setSearchResults([]);
+                  }}
+                >
+                  <img className="flex-none" alt={"Thumbnail of " + game.name} src={"http://media.steampowered.com/steamcommunity/public/images/apps/" + game.appid + "/" + game.img_icon_url + ".jpg"}/>
+                  <div>
+                    {game.name}
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          )}
         </div>
-    );
+      }
+      <p className="text-white text-2xl ml-10">
+        <Link to="/settings">Settings</Link>
+      </p>
+
+      <a href={steamOpenIdEndpointUrl.toString()} target="_self" rel="noreferrer">
+        <img src={SteamButton} alt={""}></img>
+      </a>
+    </div>
+  );
 }
