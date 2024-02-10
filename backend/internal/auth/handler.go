@@ -158,7 +158,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 
 	// Returns to the client a JSON string of AuthServiceResponseBody
 	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusFound,
+		StatusCode: http.StatusOK,
 		Body:       string(responseBody),
 	}, nil
 }
