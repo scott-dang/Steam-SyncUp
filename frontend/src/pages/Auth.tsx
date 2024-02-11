@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MoonLoader } from 'react-spinners';
 import Header from '../components/header';
-import { authServiceEndpointURL, fetchUserOwnedGames, Game } from '../utilities';
+import { useAuth } from '../context/AuthContext';
+import { authServiceEndpointURL, AuthServiceResponse, fetchGamesServiceAPI, GamesServiceResponse, User } from '../utilities';
 
 const authEndpointParams: URLSearchParams = new URLSearchParams(window.location.search);
 
 function Auth() {
 
+  const { isLoggedIn, getAuthToken, login } = useAuth();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -28,16 +30,26 @@ function Auth() {
   useEffect(() => {
 
     (async () => {
-      const data = await fetchAuthenticationStatus();
+      const authData: AuthServiceResponse = await fetchAuthenticationStatus();
 
-      if (data.is_valid === true) {
+      if (authData.is_valid === true) {
+        const gamesServiceData: GamesServiceResponse | null = await fetchGamesServiceAPI(authData.jwttoken);
+
+        if (gamesServiceData !== null) {
+
+          const user: User = {
+            authenticated: true,
+            uuid: gamesServiceData.uuid,
+            jwttoken: authData.jwttoken,
+            games: gamesServiceData.list_of_games.games,
+          }
+
+          login(JSON.stringify(user));
+        }
+      }
+
+      if (isLoggedIn()) {
         navigate("/lobbies");
-        localStorage.setItem("jwttoken", data.jwttoken);
-
-        // Store user games upon sign-in
-        const games: Game[] = await fetchUserOwnedGames();
-        localStorage.setItem("games", JSON.stringify(games));
-        alert("Logged in successfully!");
       }
     })();
 
@@ -45,10 +57,10 @@ function Auth() {
       setIsLoading(false);
       navigate("/");
       alert("Login failed!")
-    }, 2500)
+    }, 3500)
 
     return () => clearTimeout(authTimeout);
-  }, [navigate])
+  }, [navigate, login, getAuthToken, isLoggedIn])
 
   return (
     <div className="bg-[#1A1A1A] h-screen flex flex-col">

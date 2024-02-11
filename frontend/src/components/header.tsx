@@ -2,9 +2,12 @@ import '../App.css';
 import SteamButton from './steam_button.png'
 import { Link, useLocation } from 'react-router-dom';
 import React, { FormEvent, useState } from 'react';
-import { fetchUserOwnedGames, Game, steamOpenIdEndpointUrl } from '../utilities';
+import { fetchGamesServiceAPI, Game, GamesServiceResponse, steamOpenIdEndpointUrl } from '../utilities';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
+
+  const { getUser, getAuthToken, isLoggedIn, setupUser, logout } = useAuth();
 
   const [searchInput, setSearchInput] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Game[]>([]);
@@ -12,17 +15,25 @@ export default function Header() {
   // Used to determine the route we are on and conditionally load certain features (i.e., search bar)
   const location = useLocation();
 
+  // Runs when user clicks enter; refreshes list of games they own
   const onSearchSubmit = async (e: FormEvent<HTMLFormElement>) => {
 
     e.preventDefault();
 
     try {
 
-      const games: Game[] = await fetchUserOwnedGames();
+      const gamesServiceData: GamesServiceResponse | null = await fetchGamesServiceAPI(getAuthToken());
 
-      localStorage.setItem("games", JSON.stringify(games));
+      if (gamesServiceData !== null) {
 
-      onSearchChange(searchInput);
+        // Update games stored in the User
+        setupUser(JSON.stringify({
+          ...getUser(),
+          games: gamesServiceData.list_of_games.games
+        }));
+
+        onSearchChange(searchInput);
+      }
 
     } catch (err) {
       console.error(err);
@@ -33,23 +44,19 @@ export default function Header() {
 
     setSearchInput(currentInput);
   
-    const searchResultsStr: string = localStorage.getItem("games") || "[]";
-
-    if (currentInput.length > 0 && searchResultsStr !== null) {
+    if (currentInput.length > 0) {
 
       try {
 
-        const searchResults: Game[] = JSON.parse(searchResultsStr) || [];
+        const searchResults: Game[] = getUser().games;
 
         setSearchResults(searchResults.filter(
           game => game.name.toLowerCase().startsWith(currentInput.toLowerCase())
         ));
 
       } catch (err) {
-
         setSearchResults([]);
         console.error(err);
-
       }
     } else {
 
@@ -63,10 +70,12 @@ export default function Header() {
       <Link className="text-white text-3xl cursor-pointer" to="/">
         Steam SyncUp
       </Link>
-      <Link className="text-white text-2xl cursor-pointer" to="/lobbies">
-        Lobbies
-      </Link>
-      {location.pathname === "/lobbies" && 
+      {isLoggedIn() &&
+        <Link className="text-white text-2xl cursor-pointer" to="/lobbies">
+          Lobbies
+        </Link>
+      }
+      {(location.pathname === "/lobbies" && isLoggedIn()) &&
         <div className="relative ml-10 w-2/5">
           <form method="get" onSubmit={onSearchSubmit} className="w-full">
             <input
@@ -103,7 +112,11 @@ export default function Header() {
                     setSearchResults([]);
                   }}
                 >
-                  <img className="flex-none" alt={"Thumbnail of " + game.name} src={"http://media.steampowered.com/steamcommunity/public/images/apps/" + game.appid + "/" + game.img_icon_url + ".jpg"}/>
+                  <img 
+                    className="flex-none"
+                    alt={"Thumbnail of " + game.name}
+                    src={"http://media.steampowered.com/steamcommunity/public/images/apps/" + game.appid + "/" + game.img_icon_url + ".jpg"}
+                  />
                   <div>
                     {game.name}
                   </div>
@@ -114,13 +127,24 @@ export default function Header() {
           )}
         </div>
       }
-      <Link className="text-white text-2xl ml-10" to="/settings">
-        Settings
-      </Link>
 
-      <a href={steamOpenIdEndpointUrl().toString()} target="_self" rel="noreferrer">
-        <img src={SteamButton} alt={""}></img>
-      </a>
+      {isLoggedIn() &&
+        <Link className="text-white text-2xl ml-10" to="/settings">
+          Settings
+        </Link>
+      }
+
+      {!isLoggedIn() &&
+        <a href={steamOpenIdEndpointUrl().toString()} target="_self" rel="noreferrer">
+          <img src={SteamButton} alt={""}></img>
+        </a>
+      }
+
+      {isLoggedIn() &&
+        <Link onClick={logout} className="text-white text-2xl cursor-pointer" to="/">
+          Sign out
+        </Link>
+      }
     </div>
   );
 }
