@@ -57,7 +57,7 @@ function Auth() {
       setIsLoading(false);
       navigate("/");
       alert("Login failed!")
-    }, 2500)
+    }, 3500)
 
     return () => clearTimeout(authTimeout);
   }, [navigate, login, getAuthToken, isLoggedIn])
