@@ -9,6 +9,7 @@ on:
     branches: [ main ]
     paths:
       - 'frontend/**'
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -23,3 +24,12 @@ jobs:
 
     - name: Build and Test Frontend
       run: ./.github/workflows/scripts/frontend-build.sh
+
+    - name: Upload Frontend Coverage to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./frontend/coverage/lcov.info
+        flags: frontend
+      env:
+        slug: scott-dang/Steam-SyncUp

@@ -9,6 +9,7 @@ on:
     branches: [ main ]
     paths:
       - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -23,3 +24,12 @@ jobs:
 
     - name: Build and Test Backend
       run: ./.github/workflows/scripts/backend-build.sh
+
+    - name: Upload Backend Coverage to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./backend/bin/coverage.out
+        flags: backend
+      env:
+        slug: scott-dang/Steam-SyncUp

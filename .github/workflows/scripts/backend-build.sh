@@ -43,5 +43,9 @@ for dir in cmd/*; do
     fi
 done
 
+# Generate the coverage profile by rerunning the tests again
+# This run, it also includes any utilities, etc.
+go test --coverprofile="./bin/coverage.out" "./..."
+
 # Navigate back to the project root
 cd ..
