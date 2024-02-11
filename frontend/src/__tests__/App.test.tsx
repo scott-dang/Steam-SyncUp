@@ -24,25 +24,20 @@ test('renders Landing component for "/" route', () => {
   expect(screen.getByText(/landing/i)).toBeTruthy(); 
 });
 
-test('renders Lobbies component for "lobbies" route', () => {
+test('renders no Lobbies component for "lobbies" route with no auth', () => {
   render(
     routes
   );
 
-  // Check if there are two paragraphs with the text "lobbies"
-  const lobbiesElements = screen.getAllByText(/lobbies/i);
-
-  // Perform assertions on each element
-  lobbiesElements.forEach((element, index) => {
-    expect(element).toBeTruthy();
-  });
+  // Check if the Lobbies component isn't rendered
+  expect(screen.queryByText(/lobbies/i)).toBeFalsy();
 });
 
-test('renders Settings component for "/settings" route', () => {
+test('renders no Settings component for "/settings" route with no auth', () => {
   render(
     routes
   );
 
-  // Check if the Settings component is rendered
-  expect(screen.getByText(/settings/i)).toBeTruthy(); 
+  // Check if the Settings component isn't rendered
+  expect(screen.queryByText(/settings/i)).toBeFalsy(); 
 });

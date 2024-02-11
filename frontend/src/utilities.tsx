@@ -1,18 +1,30 @@
+export interface User {
+  uuid:           string;
+  authenticated:  boolean;
+  jwttoken:       string;
+  games:          Game[];
+}
+
 export interface GamesServiceResponse {
-    authenticated: boolean;
-    uuid:          string;
-    list_of_games: ListOfGames;
+  authenticated: boolean;
+  uuid:          string;
+  list_of_games: ListOfGames;
+}
+
+export interface AuthServiceResponse {
+  is_valid:     boolean;
+  jwttoken:     string;
 }
 
 export interface ListOfGames {
-    game_count: number;
-    games:      Game[];
+  game_count: number;
+  games:      Game[];
 }
 
 export interface Game {
-    appid:        number;
-    name:         string;
-    img_icon_url: string;
+  appid:        number;
+  name:         string;
+  img_icon_url: string;
 }
 
 export const isLocalHost = (): boolean => {
@@ -26,11 +38,11 @@ export const getBaseUrl = (): String => {
   return urlOrigin;
 }
 
-export const fetchUserOwnedGames = async (): Promise<Game[]> => {
+export const fetchGamesServiceAPI = async (authToken: string): Promise<GamesServiceResponse | null> => {
   try {
     const resp = await fetch(gamesServiceEndpointURL, {
       headers: {
-        "authorization": "Bearer " + localStorage.getItem("jwttoken") || "",
+        "authorization": "Bearer " + authToken,
       }
     });
 
@@ -39,17 +51,15 @@ export const fetchUserOwnedGames = async (): Promise<Game[]> => {
     if (data.authenticated === true) {
 
       const gamesServiceResponse: GamesServiceResponse = data;
-      const listOfGames: ListOfGames = gamesServiceResponse.list_of_games;
-      const games: Game[] = listOfGames.games;
 
-      return games;
+      return gamesServiceResponse;
     }
 
   } catch (err) {
     console.error(err);
   }
 
-  return[];
+  return null;
 }
 
 export const steamOpenIdEndpointUrl = (): URL => {
