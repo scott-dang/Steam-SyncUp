@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/scott-dang/Steam-SyncUp/pkg/model"
 	"github.com/scott-dang/Steam-SyncUp/pkg/util"
 )
 
@@ -17,22 +18,14 @@ type GamesServiceResponseBody struct {
 	UUID	 		string `json:"uuid"`
 	ListOfGames struct {
 		GameCount int `json:"game_count"`
-		Games     []struct {
-			Appid                    int    `json:"appid"`
-			Name                     string `json:"name"`
-			ImgIconURL               string `json:"img_icon_url"`
-		} `json:"games"`
+		Games     []model.Game `json:"games"`
 	} `json:"list_of_games"`
 }
 
 type SteamGetOwnedGamesBody struct {
 	Response struct {
 		GameCount int `json:"game_count"`
-		Games     []struct {
-			Appid                    int    `json:"appid"`
-			Name                     string `json:"name"`
-			ImgIconURL               string `json:"img_icon_url"`
-		} `json:"games"`
+		Games     []model.Game `json:"games"`
 	} `json:"response"`
 }
 
