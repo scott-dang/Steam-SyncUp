@@ -88,7 +88,7 @@ export default function Header() {
   }
 
   return (
-    <div className="flex justify-between items-center pt-10 px-10 pb-10 bg-[#222222]">
+    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-[#222222]">
       <Link className="text-white text-3xl cursor-pointer" to="/">
         Steam SyncUp
       </Link>
@@ -100,46 +100,49 @@ export default function Header() {
         </Link>
       }
 
-      {(location.pathname === "/lobbies" && selectedResult) &&
-        // Show selectedResult next to searchbar
-        <div
-          className="flex flex-row items-center cursor-pointer" onClick={() => setSelectedResult(null)}
-          title={"Remove " + selectedResult.name}
-        >
-          <img
-            className="h-12 w-12 cursor-pointer"
-            src={getGameImageUrl(selectedResult.appid, selectedResult.img_icon_url)}
-            alt={"Thumbnail of " + selectedResult.name}
-          />
-          <span className="text-white max-w-100 text-nowrap truncate ml-5">
-           {selectedResult.name}
-          </span>
-        </div>}
-
       {(location.pathname === "/lobbies" && isLoggedIn()) &&
         // Searchbar
         <div className="flex flex-initial flex-row justify-items-start relative w-2/5">
-          <div className="ml-10 w-full">
-            <form method="get" onSubmit={onSearchSubmit} className="w-full">
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-full text-white text-2l bg-transparent border border-white rounded-xl px-6 py-2 text-center focus:outline-none"
-                style={{ color: "white" }} // Adjust width
-                onChange={(e) => onSearchChange(e.target.value)}
-                onFocus={onSearchFocus}
-                onBlur={onSearchBlur}
-                value={searchInput}
-              />
-              <input type="submit" hidden/>
-            </form>
+          <div className="w-full">
+
+            {(location.pathname === "/lobbies" && selectedResult) ?
+              // Replace searchbar input with selected game
+              <div
+                className="flex flex-row items-center justify-center cursor-pointer w-full"
+                onClick={() => setSelectedResult(null)}
+                title={"Remove " + selectedResult.name}
+              >
+                <img
+                  className="h-12 w-12 cursor-pointer"
+                  src={getGameImageUrl(selectedResult.appid, selectedResult.img_icon_url)}
+                  alt={"Thumbnail of " + selectedResult.name}
+                />
+                <span className="text-3xl text-white text-nowrap truncate ml-5">
+                 {selectedResult.name}
+                </span>
+              </div>
+              :
+              // No game is selected; show searchbar text input
+              <form method="get" onSubmit={onSearchSubmit} className="w-full">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="w-full text-white text-2l bg-transparent border border-white rounded-xl px-6 py-2 text-center focus:outline-none"
+                  style={{ color: "white" }}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  onFocus={onSearchFocus}
+                  onBlur={onSearchBlur}
+                  value={searchInput}
+                />
+                <input type="submit" hidden/>
+              </form>
+            }
 
             {searchResults.length > 0 && (
               // Searchbar dropdown
-              <div className="absolute z-10 w-full bg-white rounded-md shadow-lg">
+              <div className="absolute z-10 w-full bg-white rounded-md shadow-lg overflow-y-scroll max-h-[30vh]">
 
-                {searchResults.slice(0,7) // Show max 7 games for the dropdown
-                              .map((game: Game, index) => (
+                {searchResults.map((game: Game, index) => (
                   <div
                     key={index}
                     className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-black hover:bg-gray-100 cursor-pointer"
