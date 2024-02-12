@@ -41,3 +41,4 @@ test('renders no Settings component for "/settings" route with no auth', () => {
   // Check if the Settings component isn't rendered
   expect(screen.queryByText(/settings/i)).toBeFalsy(); 
 });
+
