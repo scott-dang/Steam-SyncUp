@@ -1,25 +1,66 @@
-import React, { useState, useEffect } from 'react';
 import '../App.css';
 import Header from '../components/header';
-import Games from '../components/games.json'
 import AllLobbies from '../components/lobbies.json'
+import CreateLobbyForm from '../components/createlobbyform'
+import React, {useEffect, useState } from 'react';
+import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl} from '../utilities';
+import { useAuth } from '../context/AuthContext';
 
-function Lobbies() {
+export default function Lobbies() {
+  // State for the games sidebar
+  const {getUser, getAuthToken, setupUser} = useAuth();
+  const [gameResults, setGameResults] = useState<Game[]>([]);
+
+  // Fetches current users games, updates if user changes 
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const gamesServiceData: GamesServiceResponse | null = await fetchGamesServiceAPI(getAuthToken());
+
+        if (gamesServiceData !== null) {
+          // Update games stored in the User
+          setupUser(JSON.stringify({
+            ...getUser(),
+            games: gamesServiceData.list_of_games.games
+          }));
+        }
+
+        const gameResults: Game[] = getUser().games;
+        setGameResults(gameResults)
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchGames(); 
+  }, [getAuthToken, getUser, setupUser]);
+
+   // State for creating lobby 
+   const [showCreateForm, setShowCreateForm] = useState(false);
+
+   const handleCreateLobby = () => {
+    setShowCreateForm(!showCreateForm);
+   };
+
   return (
     <div className="overflow-hidden h-screen">
       <Header></Header>
       <div className="flex flex-row h-screen text-white">
-        <div className="bg-[#4C4C4C] w-1/4 text-xl font-bold"> {/* Increase width to 1/4 */}
+        <div className="bg-[#4C4C4C] w-1/4 text-xl font-bold  overflow-y-auto"> 
           <p className="pt-2 text-center">
             Games
           </p>
           <hr className="h-px mb-8 mt-4 bg-white border-0 dark:bg-gray-500"/>
           <ul className=''>
-            {Games.Games.map(game => 
+            {gameResults.map(game => 
               <li className='font-normal text-sm'>
                 <a href='' className='flex pl-2'>
-                  <img src='https://static.vecteezy.com/system/resources/previews/021/010/421/original/question-mark-square-vector.jpg' className='w-10'></img>
-                  <button className='ml-2'>{game}</button>
+                  <img 
+                    className='w-10'
+                    src={getGameImageUrl(game.appid, game.img_icon_url)} 
+                    alt={"Thumbnail of " + game.name}>
+                  </img>
+                  <button className='ml-2'>{game.name}</button>
                 </a>
                 <hr className="h-px my-8 bg-white border-0 dark:bg-gray-500"/>
               </li>
@@ -31,21 +72,16 @@ function Lobbies() {
             Lobbies
           </p>
           <ul className='pt-2'>
-            <ul className='flex items-center justify-center'>
-              <input
-                type="text"
-                placeholder="Search"
-                className="text-white text-xs bg-transparent border border-white rounded-full px-2 py-1.5 text-center focus:outline-none"
-                style={{ width: "90%" }}
-              />
-            </ul>
             <ul className='my-4 flex items-center justify-center'>
-              <a href='' className='w-1/2'>
-                <button className='text-white text-xs bg-transparent border border-white py-2 text-center focus:outline-none w-full'>Create Lobby</button>
-              </a>
-              <a href='' className='w-1/2'>
-                <button className='text-white text-xs bg-transparent border border-white py-2 text-center focus:outline-none w-full'>My Lobby</button>
-              </a>
+              <button 
+                className="text-white text-xs bg-transparent border border-white py-2 text-center focus:outline-none w-full" 
+                onClick={handleCreateLobby}>
+                Create Lobby
+              </button>
+              <button 
+                className='text-white text-xs bg-transparent border border-white py-2 text-center focus:outline-none w-full'>
+                My Lobby
+              </button>
             </ul>
             {AllLobbies.Lobbies.map(lobby => 
               <li className='font-normal text-sm'>
@@ -67,8 +103,8 @@ function Lobbies() {
           </div>
         </div>
       </div>
+       {/* Handles Create Lobby Form*/}
+       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} />}
     </div>
   );
 }
-
-export default Lobbies;
