@@ -4,7 +4,7 @@ import Header from '../components/header';
 
 function Lobbies() {
   return (
-    <div className="">
+    <div className="overflow-hidden h-screen">
       <Header></Header>
       <div className="flex flex-row h-screen text-white">
         <div className="bg-[#4C4C4C] w-1/6 text-xl font-bold">

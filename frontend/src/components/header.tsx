@@ -1,8 +1,8 @@
 import '../App.css';
 import SteamButton from './steam_button.png'
 import { Link, useLocation } from 'react-router-dom';
-import React, { FormEvent, useState } from 'react';
-import { fetchGamesServiceAPI, Game, GamesServiceResponse, steamOpenIdEndpointUrl } from '../utilities';
+import React, { FocusEvent, FormEvent, useState } from 'react';
+import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl, steamOpenIdEndpointUrl } from '../utilities';
 import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
@@ -11,6 +11,7 @@ export default function Header() {
 
   const [searchInput, setSearchInput] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Game[]>([]);
+  const [selectedResult, setSelectedResult] = useState<Game | null>(null);
 
   // Used to determine the route we are on and conditionally load certain features (i.e., search bar)
   const location = useLocation();
@@ -65,82 +66,120 @@ export default function Header() {
     }
   }
 
+  const onSearchFocus = (e: FocusEvent<HTMLInputElement>) => {
+    e.target.placeholder = "Press ENTER to refresh the list";
+
+    // Reopen the dropdown with current input
+    onSearchChange(e.target.value);
+  }
+
+  const onSearchBlur = (e: FocusEvent<HTMLInputElement>) => {
+    e.target.placeholder = "Search";
+
+    // Close dropdown when clicking outside dropdown
+    setSearchResults([]);
+  }
+
+  const onSearchResultMouseDown = (game: Game) => {
+    // Close the dropdown when clicking on a game from the dropdown
+    setSearchResults([]);
+
+    setSelectedResult(game);
+  }
+
   return (
-    <div className="flex justify-between items-center pt-10 px-10 pb-10 bg-[#222222]">
+    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-[#222222]">
       <Link className="text-white text-3xl cursor-pointer" to="/">
         Steam SyncUp
       </Link>
-      {isLoggedIn() &&
+
+      {(location.pathname !== "/lobbies" && isLoggedIn()) &&
+        // Lobbies button
         <Link className="text-white text-2xl cursor-pointer" to="/lobbies">
           Lobbies
         </Link>
       }
+
       {(location.pathname === "/lobbies" && isLoggedIn()) &&
-        <div className="relative ml-10 w-2/5">
-          <form method="get" onSubmit={onSearchSubmit} className="w-full">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full text-white text-2l bg-transparent border border-white rounded-xl px-6 py-2 text-center focus:outline-none"
-              style={{ color: "white" }} // Adjust width
-              onChange={(e) => onSearchChange(e.target.value)}
-              onFocus={(e) => {
-                e.target.placeholder = "Press ENTER to refresh the list";
-                // Reopen the dropdown with current input
-                onSearchChange(e.target.value);
-              }}
-              onBlur={(e) => {
-                e.target.placeholder = "Search";
-                // Close the dropdown
-                setSearchResults([]);
-              }}
-              value={searchInput}
-            />
-            <input type="submit" hidden/>
-          </form>
+        // Searchbar
+        <div className="flex flex-initial flex-row justify-items-start relative w-2/5">
+          <div className="w-full">
 
-          {searchResults.length > 0 && (
-            <div className="absolute z-10 w-full bg-white rounded-md shadow-lg">
+            {(location.pathname === "/lobbies" && selectedResult) ?
+              // Replace searchbar input with selected game
+              <div
+                className="flex flex-row items-center justify-center cursor-pointer w-full"
+                onClick={() => setSelectedResult(null)}
+                title={"Remove " + selectedResult.name}
+              >
+                <img
+                  className="h-12 w-12 cursor-pointer"
+                  src={getGameImageUrl(selectedResult.appid, selectedResult.img_icon_url)}
+                  alt={"Thumbnail of " + selectedResult.name}
+                />
+                <span className="text-3xl text-white text-nowrap truncate ml-5">
+                 {selectedResult.name}
+                </span>
+              </div>
+              :
+              // No game is selected; show searchbar text input
+              <form method="get" onSubmit={onSearchSubmit} className="w-full">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="w-full text-white text-2l bg-transparent border border-white rounded-xl px-6 py-2 text-center focus:outline-none"
+                  style={{ color: "white" }}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  onFocus={onSearchFocus}
+                  onBlur={onSearchBlur}
+                  value={searchInput}
+                />
+                <input type="submit" hidden/>
+              </form>
+            }
 
-              {searchResults.slice(0,7) // Show max 7 games for the dropdown
-                            .map((game: Game, index) => (
-                <div
-                  key={index}
-                  className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-black hover:bg-gray-100 cursor-pointer"
-                  onClick={() => {
-                    // Close the dropdown when clicking on a game from the dropdown
-                    setSearchResults([]);
-                  }}
-                >
-                  <img 
-                    className="flex-none"
-                    alt={"Thumbnail of " + game.name}
-                    src={"http://media.steampowered.com/steamcommunity/public/images/apps/" + game.appid + "/" + game.img_icon_url + ".jpg"}
-                  />
-                  <div>
-                    {game.name}
+            {searchResults.length > 0 && (
+              // Searchbar dropdown
+              <div className="absolute z-10 w-full bg-white rounded-md shadow-lg overflow-y-scroll max-h-[30vh]">
+
+                {searchResults.map((game: Game, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-black hover:bg-gray-100 cursor-pointer"
+                    onMouseDown={() => onSearchResultMouseDown(game)}
+                  >
+                    <img
+                      className="flex-none"
+                      alt={"Thumbnail of " + game.name}
+                      src={getGameImageUrl(game.appid, game.img_icon_url)}
+                    />
+                    <div>
+                      {game.name}
+                    </div>
                   </div>
-                </div>
-              ))}
-
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       }
 
       {isLoggedIn() &&
+        // Settings button
         <Link className="text-white text-2xl ml-10" to="/settings">
           Settings
         </Link>
       }
 
       {!isLoggedIn() &&
+        // Steam button
         <a href={steamOpenIdEndpointUrl().toString()} target="_self" rel="noreferrer">
           <img src={SteamButton} alt={""}></img>
         </a>
       }
 
       {isLoggedIn() &&
+        // Signout button
         <Link onClick={logout} className="text-white text-2xl cursor-pointer" to="/">
           Sign out
         </Link>

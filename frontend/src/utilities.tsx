@@ -33,9 +33,13 @@ export const isLocalHost = (): boolean => {
     window.location.hostname === "";
 }
 
-export const getBaseUrl = (): String => {
-  const urlOrigin: String = window.location.origin;
+export const getBaseUrl = (): string => {
+  const urlOrigin: string = window.location.origin;
   return urlOrigin;
+}
+
+export const getGameImageUrl = (appid: number, hash: string): string => {
+  return "http://media.steampowered.com/steamcommunity/public/images/apps/" + appid + "/" + hash + ".jpg";
 }
 
 export const fetchGamesServiceAPI = async (authToken: string): Promise<GamesServiceResponse | null> => {
