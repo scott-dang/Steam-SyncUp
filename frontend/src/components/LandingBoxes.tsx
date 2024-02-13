@@ -26,22 +26,46 @@ export default function LandingBoxes() {
 	}, [getAuthToken]);
 
 	return (
-		<div className="grid p-3 grid-cols-6 gap-10">
+		<div className="grid grid-cols-6">
 			{(games || []).map((game, index) => {
 				return (
-					<div key={index} className="bg-white p-2 rounded-lg">
-						<h3 className="text-l font-bold mb-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
-							{game.name}
-						</h3>
-						<img
-							src={
-								"https://cdn.akamai.steamstatic.com/steam/apps/" +
-								game.appid +
-								"/header.jpg"
-							}
-							alt={game.name}
-							className="w-full h-w object-cover mb-4 rounded-lg"
-						/>
+					<div
+						key={index}
+						className="relative bg-white p-3 overflow-hidden"
+						style={{
+							backgroundImage: `url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
+							backgroundSize: "cover",
+							backdropFilter: "blur(5px)",
+						}}
+					>
+						<div className="absolute inset-0 backdrop-filter backdrop-blur-lg"></div>
+						<div
+							className="absolute inset-0"
+							style={{
+								background:
+									"radial-gradient(circle, transparent, rgba(0,0,0,0.5))",
+							}}
+						></div>
+						<div className="relative p-2">
+							<h1
+								className="text-l text-white font-bold mb-3 overflow-hidden overflow-ellipsis whitespace-nowrap"
+								style={{
+									textShadow:
+										"1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
+								}}
+							>
+								{game.name}
+							</h1>
+							<img
+								src={
+									"https://cdn.akamai.steamstatic.com/steam/apps/" +
+									game.appid +
+									"/header.jpg"
+								}
+								alt={game.name}
+								className="w-full h-w mb-5 rounded-lg"
+							/>
+						</div>
 					</div>
 				);
 			})}
