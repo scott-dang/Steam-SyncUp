@@ -11,16 +11,16 @@ export default function Lobbies() {
   const {getUser, getAuthToken, setupUser} = useAuth();
   const [gameResults, setGameResults] = useState<Game[]>([]);
 
+  // Chat and game states
   const [currentGame, setCurrentGame] = useState<String>("");
   const [messages, setMessages] = useState<string[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState<string>("");
 
+  // State for creating lobby 
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
-    // State for creating lobby 
-    const [showCreateForm, setShowCreateForm] = useState(false);
-
-  // Fetches current users games, updates if user changes 
+  // Fetches current users games and lobbies, updates if user changes 
   useEffect(() => {
 
     const fetchGames = async () => {
@@ -60,7 +60,6 @@ export default function Lobbies() {
     }
   }, [messages])
  
-
   const addMessage = (message: string) => {
     setMessages(prevMessages => [message, ...prevMessages]);
   };
@@ -78,6 +77,10 @@ export default function Lobbies() {
   setShowCreateForm(!showCreateForm);
   };
 
+  const handleCurrentGame = (current: string) => {
+    setCurrentGame(current)
+  }
+
   return (
     <div className="overflow-hidden h-screen">
 
@@ -88,18 +91,27 @@ export default function Lobbies() {
       <div className="flex flex-row h-screen text-white">
 
         {/* Games list component */}
-        <GamesList gameResults={gameResults} />
+        <GamesList gameResults={gameResults} handleCurrentGame={handleCurrentGame} />
 
         {/* Lobbies list component */}
         <LobbiesList handleCreateLobby={handleCreateLobby} />
 
         <div className="flex flex-col bg-[#1A1A1A] w-full">
+
+          {/* Current seleceted game header */}
           <div className="bg-[#212121] h-20 text-white font-bold text-4xl">
             {currentGame}
           </div>
+
+          {/* Scrolling chat area */}
+          <ChatArea messages={messages} chatRef={chatRef} />
+
+          {/* Input box */}
+          <InputBox inputText={inputText} handleInputChange={handleInputChange} handleSendMessage={handleSendMessage} />
         </div>
 
       </div>
+      
        {/* Handles Create Lobby Form*/}
        {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} />}
     </div>
@@ -107,7 +119,7 @@ export default function Lobbies() {
 }
 
 // Games list component
-const GamesList: React.FC<{gameResults: Game[]}> = ({ gameResults }) => {
+const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (current: string) => void }> = ({ gameResults, handleCurrentGame }) => {
   return (
     <div className="bg-[#4C4C4C] w-1/4 text-xl font-bold  overflow-y-auto"> 
       <p className="pt-2 text-center">
@@ -117,7 +129,7 @@ const GamesList: React.FC<{gameResults: Game[]}> = ({ gameResults }) => {
       <ul className=''>
         {gameResults && gameResults.map(game => 
           <li className='font-normal text-sm'>
-            <a href='' className='flex pl-2'>
+            <a className='flex pl-2' onClick={() => handleCurrentGame(game.name)}>
               <img 
                 className='w-10'
                 src={getGameImageUrl(game.appid, game.img_icon_url)} 
@@ -131,7 +143,7 @@ const GamesList: React.FC<{gameResults: Game[]}> = ({ gameResults }) => {
       </ul>
     </div>
   )
-}
+};
 
 // Lobbies list component
 const LobbiesList: React.FC<{  handleCreateLobby: () => void }> = ({ handleCreateLobby }) => {
@@ -167,4 +179,36 @@ const LobbiesList: React.FC<{  handleCreateLobby: () => void }> = ({ handleCreat
       </ul>
     </div>
   )
-}
+};
+
+// Chat area component
+const ChatArea: React.FC<{ messages: string[], chatRef: React.RefObject<HTMLDivElement> }> = ({ messages, chatRef }) => (
+  <div ref={chatRef} className="overflow-y-auto p-4 flex flex-col-reverse h-screen" style={{ maxHeight: 'calc(90vh - 200px)' }}>
+    {messages.map((message, index) => (
+      <div key={index} className="mb-2">{message}</div>
+    ))}
+  </div>
+);
+
+// Input box component
+const InputBox: React.FC<{
+  inputText: string,
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  handleSendMessage: () => void
+}> = ({ inputText, handleInputChange, handleSendMessage }) => (
+  <div className="flex p-4">
+    <input 
+      type="text" 
+      placeholder="Type your message..." 
+      value={inputText} 
+      onChange={handleInputChange}
+      onKeyPress={(e) => {
+        if (e.key === 'Enter') {
+          handleSendMessage();
+        }
+      }}
+      className="w-full rounded-2xl border-2 border-gray-500 p-2 bg-transparent"
+    />
+    <button className="bg-gray-700 text-white rounded-2xl px-4 py-2 ml-2" onClick={handleSendMessage}>Send</button>
+  </div>
+);
