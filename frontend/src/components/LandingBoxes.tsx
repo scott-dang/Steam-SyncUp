@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import {
-	Game,
-	GamesServiceResponse,
-	fetchGamesServiceAPI,
-	getGameImageUrl,
-} from "../utilities";
+import { Game, GamesServiceResponse, fetchGamesServiceAPI } from "../utilities";
 
 export default function LandingBoxes() {
 	const [games, setGames] = useState<Game[]>([]);
@@ -20,7 +15,7 @@ export default function LandingBoxes() {
 				console.log(gamesServiceData);
 
 				if (gamesServiceData !== null) {
-					setGames(gamesServiceData.list_of_games.games.slice(0, 12));
+					setGames(gamesServiceData.list_of_games.games.slice(0, 42));
 				}
 			} catch (err) {
 				console.error(err);

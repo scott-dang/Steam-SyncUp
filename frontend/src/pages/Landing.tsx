@@ -5,9 +5,9 @@ import LandingBoxes from "../components/LandingBoxes";
 
 function Landing() {
 	return (
-		<div className="bg-[#1A1A1A] h-screen">
+		<div className="bg-[#1A1A1A] h-screen overflow-hidden">
 			<Header></Header>
-			<div p-4>
+			<div className="h-full overflow-scroll">
 				<LandingBoxes></LandingBoxes>
 			</div>
 		</div>
