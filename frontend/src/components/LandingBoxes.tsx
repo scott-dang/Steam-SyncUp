@@ -33,7 +33,7 @@ export default function LandingBoxes() {
 						></div>
 						<div className="relative p-1">
 							<h1
-								className="text-l text-white font-bold mb-5 overflow-hidden overflow-ellipsis whitespace-nowrap"
+								className="text-lg text-white font-bold mb-5 overflow-hidden overflow-ellipsis whitespace-nowrap"
 								style={{
 									textShadow:
 										"1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black",
