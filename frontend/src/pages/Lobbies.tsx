@@ -3,7 +3,7 @@ import Header from '../components/header';
 import AllLobbies from '../components/lobbies.json'
 import CreateLobbyForm from '../components/createlobbyform'
 import React, {useEffect, useRef, useState } from 'react';
-import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl} from '../utilities';
+import { Game, getGameImageUrl} from '../utilities';
 import { useAuth } from '../context/AuthContext';
 
 export default function Lobbies() {
@@ -111,7 +111,7 @@ export default function Lobbies() {
         </div>
 
       </div>
-      
+
        {/* Handles Create Lobby Form*/}
        {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} />}
     </div>
@@ -129,14 +129,14 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (current: str
       <ul className=''>
         {gameResults && gameResults.map(game => 
           <li className='font-normal text-sm'>
-            <a className='flex pl-2' onClick={() => handleCurrentGame(game.name)}>
+            <button className='flex pl-2 items-center' onClick={() => handleCurrentGame(game.name)}>
               <img 
                 className='w-10'
                 src={getGameImageUrl(game.appid, game.img_icon_url)} 
                 alt={"Thumbnail of " + game.name}>
               </img>
-              <button className='ml-2'>{game.name}</button>
-            </a>
+              <p className='ml-2'>{game.name}</p>
+            </button>
             <hr className="h-px my-8 bg-white border-0 dark:bg-gray-500"/>
           </li>
         )}
@@ -168,9 +168,9 @@ const LobbiesList: React.FC<{  handleCreateLobby: () => void }> = ({ handleCreat
           <li className='font-normal text-sm'>
             <div className="flex mx-2 text-white text-xs items-center">
               <p>{lobby.name}</p>
-              <a href='' className='ml-auto pl-2'>
+              <button className='ml-auto pl-2'>
                 <button className='bg-transparent border border-white rounded-full px-6 py-1 text-center focus:outline-none ml-2'>join</button>
-              </a>
+              </button>
               <p className="ml-2">{lobby.players}/5</p> 
             </div>
             <hr className="h-px my-4 bg-white border-0 dark:bg-gray-500"/>
