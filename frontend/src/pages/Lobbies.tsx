@@ -15,24 +15,40 @@ export default function Lobbies() {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const gamesServiceData: GamesServiceResponse | null = await fetchGamesServiceAPI(getAuthToken());
-
-        if (gamesServiceData !== null) {
-          // Update games stored in the User
-          setupUser(JSON.stringify({
-            ...getUser(),
-            games: gamesServiceData.list_of_games.games
-          }));
-        }
-
-        const gameResults: Game[] = getUser().games;
-        setGameResults(gameResults)
+        
+        setGameResults(getUser().games)
+        
       } catch (err) {
         console.error(err);
       }
     };
 
-    fetchGames(); 
+    const fetchLobbies = async () => {
+      const lobbiesServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/GetLobbies?game=400")
+
+      try {
+
+        console.log(getAuthToken())
+        
+        const resp = await fetch(lobbiesServiceEndpointURL, {
+          headers: {
+            "authorization": "Bearer " + getAuthToken(),
+          }
+        });
+
+        const data = await resp.json();
+
+        console.log("Attempting to fetch " + data)
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchGames();
+
+    fetchLobbies();
+
   }, [getAuthToken, getUser, setupUser]);
 
    // State for creating lobby 
@@ -52,7 +68,7 @@ export default function Lobbies() {
           </p>
           <hr className="h-px mb-8 mt-4 bg-white border-0 dark:bg-gray-500"/>
           <ul className=''>
-            {gameResults.map(game => 
+            {gameResults && gameResults.map(game => 
               <li className='font-normal text-sm'>
                 <a href='' className='flex pl-2'>
                   <img 
