@@ -6,6 +6,13 @@ import React, {useEffect, useRef, useState } from 'react';
 import { Game, getGameImageUrl} from '../utilities';
 import { useAuth } from '../context/AuthContext';
 
+interface Lobby {
+  name: string,
+  leader: string,
+  users: string[]
+  maxusers: number;
+}
+
 export default function Lobbies() {
   // State for the games sidebar
   const {getUser, getAuthToken, setupUser} = useAuth();
@@ -16,6 +23,10 @@ export default function Lobbies() {
   const [messages, setMessages] = useState<string[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState<string>("");
+
+  const [currentLobby, setCurrentLobby] = useState<Lobby>();
+
+  const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
 
   // State for creating lobby 
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -34,14 +45,37 @@ export default function Lobbies() {
     const fetchLobbies = async () => {
       const lobbiesServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/GetLobbies?game=400")
       try {
+
+        console.log("Fetching lobbies")
         const resp = await fetch(lobbiesServiceEndpointURL, {
           headers: {
             "authorization": "Bearer " + getAuthToken(),
           }
         });
+        
         const data = await resp.json();
-        if (data.authenticated === true) {
-          console.log(data)
+
+        if (data) {
+
+          const lobbies: Lobby[] = data.map((lobbyData: any) => {
+
+            const lobby: Lobby = {
+              name: lobbyData.lobbyname,
+              leader: lobbyData.leader,
+              users: lobbyData.lobbyusers,
+              maxusers: lobbyData.maxusers
+            }
+
+            return lobby;
+          });
+          
+          if (currentLobbyList) {
+            
+            setCurrentLobbyList(lobbies)
+            setCurrentLobby(currentLobbyList[0])
+            
+          };
+
         }
       } catch (err) {
         console.error(err);
@@ -94,7 +128,7 @@ export default function Lobbies() {
         <GamesList gameResults={gameResults} handleCurrentGame={handleCurrentGame} />
 
         {/* Lobbies list component */}
-        <LobbiesList handleCreateLobby={handleCreateLobby} />
+        <LobbiesList currentLobbyList={currentLobbyList} handleCreateLobby={handleCreateLobby} />
 
         <div className="flex flex-col bg-[#1A1A1A] w-full">
 
@@ -146,7 +180,7 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (current: str
 };
 
 // Lobbies list component
-const LobbiesList: React.FC<{  handleCreateLobby: () => void }> = ({ handleCreateLobby }) => {
+const LobbiesList: React.FC<{ currentLobbyList: Lobby[], handleCreateLobby: () => void }> = ({ currentLobbyList, handleCreateLobby }) => {
   return (
     <div className="bg-[#212121] w-1/4 text-xl font-bold"> 
       <p className="pt-2 text-center">
@@ -164,14 +198,15 @@ const LobbiesList: React.FC<{  handleCreateLobby: () => void }> = ({ handleCreat
             My Lobby
           </button>
         </ul>
-        {AllLobbies.Lobbies.map(lobby => 
+
+        {currentLobbyList.map(lobby => 
           <li className='font-normal text-sm'>
             <div className="flex mx-2 text-white text-xs items-center">
               <p>{lobby.name}</p>
               <button className='ml-auto pl-2'>
                 <button className='bg-transparent border border-white rounded-full px-6 py-1 text-center focus:outline-none ml-2'>join</button>
               </button>
-              <p className="ml-2">{lobby.players}/5</p> 
+              <p className="ml-2">{lobby.users.length} / {lobby.maxusers}</p> 
             </div>
             <hr className="h-px my-4 bg-white border-0 dark:bg-gray-500"/>
           </li>
