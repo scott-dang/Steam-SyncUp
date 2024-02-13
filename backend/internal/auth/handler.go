@@ -71,7 +71,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Credentials": true,
+				"Access-Control-Allow-Credentials": "true",
 			},
 		}, err
 	}
@@ -83,7 +83,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Credentials": true,
+				"Access-Control-Allow-Credentials": "true",
 			},
 		}, err
 	}
@@ -95,7 +95,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Credentials": true,
+				"Access-Control-Allow-Credentials": "true",
 			},
 		}, err
 	}
@@ -118,7 +118,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 				StatusCode: http.StatusInternalServerError,
 				Headers: map[string]string{
 					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Credentials": true,
+					"Access-Control-Allow-Credentials": "true",
 				},
 			}, err
 		}
@@ -137,7 +137,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 				StatusCode: http.StatusInternalServerError,
 				Headers: map[string]string{
 					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Credentials": true,
+					"Access-Control-Allow-Credentials": "true",
 				},
 			}, err
 		}
@@ -156,7 +156,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 				StatusCode: http.StatusInternalServerError,
 				Headers: map[string]string{
 					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Credentials": true,
+					"Access-Control-Allow-Credentials": "true",
 				},
 			}, err
 		}
@@ -167,7 +167,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 				StatusCode: http.StatusInternalServerError,
 				Headers: map[string]string{
 					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Credentials": true,
+					"Access-Control-Allow-Credentials": "true",
 				},
 			}, err
 		}
@@ -183,7 +183,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Credentials": true,
+				"Access-Control-Allow-Credentials": "true",
 			},
 		}, err
 	}
@@ -194,7 +194,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		Body:       string(responseBody),
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Credentials": true,
+			"Access-Control-Allow-Credentials": "true",
 		},
 	}, nil
 }
