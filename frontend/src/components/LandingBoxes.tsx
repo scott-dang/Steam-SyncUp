@@ -1,57 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAuth } from "../context/AuthContext";
-import { Game, GamesServiceResponse, fetchGamesServiceAPI } from "../utilities";
 
 export default function LandingBoxes() {
-	const [games, setGames] = useState<Game[]>([]);
-	const { getAuthToken } = useAuth();
-
-	useEffect(() => {
-		const update = async () => {
-			try {
-				const gamesServiceData: GamesServiceResponse | null =
-					await fetchGamesServiceAPI(getAuthToken());
-
-				console.log(gamesServiceData);
-
-				if (gamesServiceData !== null) {
-					setGames(gamesServiceData.list_of_games.games.slice(0, 42));
-				}
-			} catch (err) {
-				console.error(err);
-			}
-		};
-
-		update();
-	}, [getAuthToken]);
+	const { getUser } = useAuth();
 
 	return (
 		<div className="grid grid-cols-6">
-			{(games || []).map((game, index) => {
+			{(getUser().games || []).map((game, index) => {
 				return (
 					<div
 						key={index}
-						className="relative bg-white p-3 overflow-hidden"
+						className="bg-white p-3"
 						style={{
 							backgroundImage: `url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
 							backgroundSize: "cover",
 							backdropFilter: "blur(5px)",
+							boxShadow: "0 0 4px 4px black inset",
 						}}
 					>
-						<div className="absolute inset-0 backdrop-filter backdrop-blur-lg"></div>
+						<div
+							className="absolute inset-0 backdrop-blur-lg"
+							style={{
+								boxShadow: "0 0 4px 4px black inset",
+							}}
+						></div>
 						<div
 							className="absolute inset-0"
 							style={{
 								background:
-									"radial-gradient(circle, transparent, rgba(0,0,0,0.5))",
+									"radial-gradient(circle, transparent, rgba(0,0,0,0.7))",
 							}}
 						></div>
-						<div className="relative p-2">
+						<div className="relative p-1">
 							<h1
-								className="text-l text-white font-bold mb-3 overflow-hidden overflow-ellipsis whitespace-nowrap"
+								className="text-l text-white font-bold mb-5 overflow-hidden overflow-ellipsis whitespace-nowrap"
 								style={{
 									textShadow:
-										"1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
+										"1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black",
 								}}
 							>
 								{game.name}
