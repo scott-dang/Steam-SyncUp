@@ -57,6 +57,10 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
     if err != nil {
       return events.APIGatewayProxyResponse{
         StatusCode: http.StatusInternalServerError,
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
       }, nil
     }
 
@@ -64,6 +68,10 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
     if err != nil {
       return events.APIGatewayProxyResponse{
         StatusCode: http.StatusInternalServerError,
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
       }, nil
     }
 
@@ -74,16 +82,26 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
     if err != nil {
       return events.APIGatewayProxyResponse{
         StatusCode: http.StatusInternalServerError,
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
       }, nil
     }
 
     body.ListOfGames = getOwnedGamesBody.Response
 	}
 
-	responseBody, _ := json.Marshal(body)
+	responseBody, _ := json.Marshal({
+		body,
+	})
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(responseBody),
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
 	}, nil
 }
