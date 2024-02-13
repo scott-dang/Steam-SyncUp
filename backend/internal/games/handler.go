@@ -92,9 +92,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
     body.ListOfGames = getOwnedGamesBody.Response
 	}
 
-	responseBody, _ := json.Marshal({
-		body,
-	})
+	responseBody, _ := json.Marshal(body)
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
