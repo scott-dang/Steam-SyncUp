@@ -35,13 +35,15 @@ export default function LandingBoxes() {
 			{(games || []).map((game, index) => {
 				return (
 					<div key={index} className="bg-white p-2 rounded-lg">
-						<h3 className="text-l font-bold mb-2">
-							{game.name.length > 20
-								? game.name.slice(0, 20) + "..."
-								: game.name}
+						<h3 className="text-l font-bold mb-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
+							{game.name}
 						</h3>
 						<img
-							src={getGameImageUrl(game.appid, game.img_icon_url)}
+							src={
+								"https://cdn.akamai.steamstatic.com/steam/apps/" +
+								game.appid +
+								"/header.jpg"
+							}
 							alt={game.name}
 							className="w-full h-w object-cover mb-4 rounded-lg"
 						/>
