@@ -32,15 +32,6 @@ export default function LandingBoxes() {
 							}}
 						></div>
 						<div className="relative p-1">
-							<h1
-								className="text-lg text-white font-bold mb-5 overflow-hidden overflow-ellipsis whitespace-nowrap"
-								style={{
-									textShadow:
-										"1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black",
-								}}
-							>
-								{game.name}
-							</h1>
 							<img
 								src={
 									"https://cdn.akamai.steamstatic.com/steam/apps/" +
@@ -48,8 +39,17 @@ export default function LandingBoxes() {
 									"/header.jpg"
 								}
 								alt={game.name}
-								className="w-full h-w mb-5 rounded-lg"
+								className="w-full h-w mb-3 rounded-lg"
 							/>
+							<h1
+								className="text-lg text-white font-bold mb-3 overflow-hidden overflow-ellipsis whitespace-nowrap"
+								style={{
+									textShadow:
+										"1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black",
+								}}
+							>
+								{game.name}
+							</h1>
 						</div>
 					</div>
 				);
