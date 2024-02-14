@@ -22,32 +22,31 @@ type LobbiesServiceResponseBody struct {
 
 func Handler(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	switch request.Resource {
-		case "/CreateLobby":
-			return handleCreateLobby(context, request)
+	case "/CreateLobby":
+		return handleCreateLobby(context, request)
 
-		case "/GetLobbies":
-			return handleGetLobbies(context, request)
+	case "/GetLobbies":
+		return handleGetLobbies(context, request)
 
-		case "/JoinLobby":
-			return handleJoinLobby(context, request)
+	case "/JoinLobby":
+		return handleJoinLobby(context, request)
 
-		case "/LeaveLobby":
-			return handleLeaveLobby(context, request)
+	case "/LeaveLobby":
+		return handleLeaveLobby(context, request)
 
-		case "/KickLobbyUser":
-			return HandleKickLobbyUser(context, request)
+	case "/KickLobbyUser":
+		return HandleKickLobbyUser(context, request)
 
-		default:	
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusNotFound,
-				Headers: map[string]string{
-					"Access-Control-Allow-Origin": "*",
-					"Access-Control-Allow-Credentials": "true",
-				},
-			}, nil
+	default:
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusNotFound,
+			Headers: map[string]string{
+				"Access-Control-Allow-Origin":      "*",
+				"Access-Control-Allow-Credentials": "true",
+			},
+		}, nil
 	}
 }
-
 
 type CreateLobbyRequest struct {
 	Lobby model.Lobby `json:"lobby"`
@@ -68,11 +67,11 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 	// authenticate the request
 	user, err := util.Authenticate(request, context)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -83,12 +82,12 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 	name := request.QueryStringParameters["name"]
 	maxusersStr := request.QueryStringParameters["maxusers"]
 
-	if (game == "" || name == "" || maxusersStr == "") {
+	if game == "" || name == "" || maxusersStr == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"missing required parameters\" }",
+			Body:       "{ \"error\": \"missing required parameters\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -96,12 +95,12 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 
 	maxusers, err := strconv.Atoi(maxusersStr)
 
-	if (err != nil || maxusers < 2 || maxusers > 10) {
+	if err != nil || maxusers < 2 || maxusers > 10 {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"bad num of users\" }",
+			Body:       "{ \"error\": \"bad num of users\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -114,7 +113,7 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -124,30 +123,29 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 	found, _ := client.GetItem(context, &dynamodb.GetItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
-			"appid": &types.AttributeValueMemberN{Value: game},
+			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: user.SteamUUID},
 		},
 	})
 
-
-	if (len(found.Item) > 0) {
+	if len(found.Item) > 0 {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"user already owns a lobby\" }",
+			Body:       "{ \"error\": \"user already owns a lobby\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
-	
+
 	}
 
 	// create the new lobby in dynamodb
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String("Lobbies"),
 		Item: map[string]types.AttributeValue{
-			"leader": &types.AttributeValueMemberS{Value: user.SteamUUID},
-			"appid": &types.AttributeValueMemberN{Value: game},
+			"leader":    &types.AttributeValueMemberS{Value: user.SteamUUID},
+			"appid":     &types.AttributeValueMemberN{Value: game},
 			"lobbyname": &types.AttributeValueMemberS{Value: name},
 			"lobbyusers": &types.AttributeValueMemberSS{
 				Value: []string{user.SteamUUID},
@@ -159,12 +157,12 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 
 	_, err = client.PutItem(context, input)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body: "{ \"error\": \"" + err.Error() + "\" }",
+			Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -173,7 +171,7 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
 		},
 	}, nil
@@ -188,11 +186,11 @@ If the request is successful, the response will be a 200 OK with a list of lobbi
 func handleGetLobbies(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	_, err := util.Authenticate(request, context)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -202,12 +200,12 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 
 	game := request.QueryStringParameters["game"]
 
-	if (game == "") {
+	if game == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"missing required parameters\" }",
+			Body:       "{ \"error\": \"missing required parameters\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -220,7 +218,7 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -229,7 +227,7 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	// get the lobbies from DynamoDB
 
 	response, err := client.Query(context, &dynamodb.QueryInput{
-		TableName: aws.String("Lobbies"),
+		TableName:              aws.String("Lobbies"),
 		KeyConditionExpression: aws.String("appid = :a"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":a": &types.AttributeValueMemberN{Value: game},
@@ -237,12 +235,12 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 		ProjectionExpression: aws.String("leader, lobbyname, lobbyusers, maxusers"),
 	})
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body: "{ \"error\": \"" + err.Error() + "\" }",
+			Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -251,11 +249,11 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	var lobbies []model.Lobby
 	err = attributevalue.UnmarshalListOfMaps(response.Items, &lobbies)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -263,11 +261,11 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 
 	responseBody, err := json.Marshal(lobbies)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -275,9 +273,9 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body: string(responseBody),
+		Body:       string(responseBody),
 		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
 		},
 	}, nil
@@ -296,11 +294,11 @@ If the lobby is full, the response will be a 403 Forbidden
 func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	user, err := util.Authenticate(request, context)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -314,9 +312,9 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	if game == "" || leader == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"missing required parameters\" }",
+			Body:       "{ \"error\": \"missing required parameters\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -329,7 +327,7 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -339,17 +337,17 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	response, err := client.GetItem(context, &dynamodb.GetItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
-			"appid": &types.AttributeValueMemberN{Value: game},
+			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: leader},
 		},
 	})
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body: "{ \"error\": \"" + err.Error() + "\" }",
+			Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -358,22 +356,22 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	var lobbyObj model.Lobby
 	err = attributevalue.UnmarshalMap(response.Item, &lobbyObj)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
 	}
 
-	if (len(lobbyObj.LobbyUsers) >= lobbyObj.MaxUsers) {
+	if len(lobbyObj.LobbyUsers) >= lobbyObj.MaxUsers {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusForbidden,
-			Body: "{ \"error\": \"lobby is full\" }",
+			Body:       "{ \"error\": \"lobby is full\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -383,7 +381,7 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
-			"appid": &types.AttributeValueMemberN{Value: game},
+			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: leader},
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
@@ -396,12 +394,12 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 
 	_, err = client.UpdateItem(context, input)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body: "{ \"error\": \"" + err.Error() + "\" }",
+			Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -410,7 +408,7 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
 		},
 	}, nil
@@ -428,11 +426,11 @@ If the request is missing parameters, the response will be a 400 Bad Request
 func handleLeaveLobby(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	user, err := util.Authenticate(request, context)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -446,9 +444,9 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	if game == "" || leader == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"missing required parameters\" }",
+			Body:       "{ \"error\": \"missing required parameters\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -461,7 +459,7 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -473,7 +471,7 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 		_, err = client.DeleteItem(context, &dynamodb.DeleteItemInput{
 			TableName: aws.String("Lobbies"),
 			Key: map[string]types.AttributeValue{
-				"appid": &types.AttributeValueMemberN{Value: game},
+				"appid":  &types.AttributeValueMemberN{Value: game},
 				"leader": &types.AttributeValueMemberS{Value: leader},
 			},
 		})
@@ -481,18 +479,18 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
-				Body: "{ \"error\": \"" + err.Error() + "\" }",
+				Body:       "{ \"error\": \"" + err.Error() + "\" }",
 				Headers: map[string]string{
-					"Access-Control-Allow-Origin": "*",
+					"Access-Control-Allow-Origin":      "*",
 					"Access-Control-Allow-Credentials": "true",
 				},
 			}, nil
 		}
-		
+
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusOK,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -502,7 +500,7 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
-			"appid": &types.AttributeValueMemberN{Value: game},
+			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: leader},
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
@@ -518,9 +516,9 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body: "{ \"error\": \"" + err.Error() + "\" }",
+			Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -529,7 +527,7 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
 		},
 	}, nil
@@ -547,11 +545,11 @@ If the request is missing parameters, the response will be a 400 Bad Request
 func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	user, err := util.Authenticate(request, context)
 
-	if (err != nil) {
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -564,9 +562,9 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	if game == "" || userToKick == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body: "{ \"error\": \"missing required parameters\" }",
+			Body:       "{ \"error\": \"missing required parameters\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -579,7 +577,7 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -589,7 +587,7 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
-			"appid": &types.AttributeValueMemberN{Value: game},
+			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: user.SteamUUID},
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
@@ -605,9 +603,9 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body: "{ \"error\": \"" + err.Error() + "\" }",
+			Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			Headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin":      "*",
 				"Access-Control-Allow-Credentials": "true",
 			},
 		}, nil
@@ -616,7 +614,7 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
 		},
 	}, nil

@@ -24,43 +24,43 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		body.Authenticated = true
 		body.UUID = user.SteamUUID
 
-    steamGetOwnedGamesAPI := "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?"
-    steamAPIKey := os.Getenv("STEAM_API_KEY")
+		steamGetOwnedGamesAPI := "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?"
+		steamAPIKey := os.Getenv("STEAM_API_KEY")
 
-    queryParams := url.Values{
-      "key": {steamAPIKey},
-      "steamid": {user.SteamUUID},
-      "include_appinfo": {"true"},
-      "include_played_free_games": {"true"},
-    }
+		queryParams := url.Values{
+			"key":                       {steamAPIKey},
+			"steamid":                   {user.SteamUUID},
+			"include_appinfo":           {"true"},
+			"include_played_free_games": {"true"},
+		}
 
-    steamGetOwnedGamesAPIURL := steamGetOwnedGamesAPI + queryParams.Encode()
+		steamGetOwnedGamesAPIURL := steamGetOwnedGamesAPI + queryParams.Encode()
 
-    resp, err := http.Get(steamGetOwnedGamesAPIURL)
-    if err != nil {
-      return events.APIGatewayProxyResponse{
-        StatusCode: http.StatusInternalServerError,
-      }, nil
-    }
+		resp, err := http.Get(steamGetOwnedGamesAPIURL)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, nil
+		}
 
-    getOwnedGamesBodyJson, err := io.ReadAll(resp.Body)
-    if err != nil {
-      return events.APIGatewayProxyResponse{
-        StatusCode: http.StatusInternalServerError,
-      }, nil
-    }
+		getOwnedGamesBodyJson, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, nil
+		}
 
-    getOwnedGamesBody := util.SteamGetOwnedGamesBody{}
+		getOwnedGamesBody := util.SteamGetOwnedGamesBody{}
 
-    err = json.Unmarshal(getOwnedGamesBodyJson, &getOwnedGamesBody)
+		err = json.Unmarshal(getOwnedGamesBodyJson, &getOwnedGamesBody)
 
-    if err != nil {
-      return events.APIGatewayProxyResponse{
-        StatusCode: http.StatusInternalServerError,
-      }, nil
-    }
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, nil
+		}
 
-    body.ListOfGames = getOwnedGamesBody.Response
+		body.ListOfGames = getOwnedGamesBody.Response
 	}
 
 	responseBody, _ := json.Marshal(body)
