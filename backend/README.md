@@ -13,6 +13,15 @@
 
 - **go.mod** and **go.sum**: Go module files for handling project dependencies.
 
+## Deploying
+Use the following command to deploy AWS Lambda functions to production:
+env GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./bin/authservice/bootstrap ./cmd/authservice/main.go && 7z a -tzip ./bin/authservice/main.zip ./bin/authservice/bootstrap && aws lambda update-function-code --function-name AuthService --region us-west-2 --zip-file fileb://.//bin/authservice/main.zip
+
+Modify the paths and function name to reflect the Lambda function you want to update. The example is for Auth Service.
+
+You must have AWS CLI installed to run the command, and Windows you need 7-Zip to run the command.
+
+
 ## Testing
 - Unit tests will be created in parallel in the same directory with the code they are testing on. For example, if unit testing `handlerA.go`, we can create a test file suffixed with _test like so, `handlerA_test.go`  before running `go test`.
 - Integration tests can be created in its own directory as its responsibility is across multiple directories / files.
