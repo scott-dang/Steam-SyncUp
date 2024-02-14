@@ -13,6 +13,15 @@ Steam SyncUp enables users to find and join a game community, tailored to their 
 ## Requirements
 A modern web browser with stable internet connection is needed along with a Steam account that has _game details_ set to public.
 
+## Current functionality
+
+- Login with Steam (Must have public accout)
+- See account's games
+- See logged in account's details in settings
+- Create lobbies
+- Send messages (currently just one messaging channel. More to come when more lobby management is integrated with frontend)
+- Logout
+
 ## Local Installation
 
 To install a local instance of Steam-SyncUp, refer to the frontend directory's [README](frontend/README.md) for further instructions.
