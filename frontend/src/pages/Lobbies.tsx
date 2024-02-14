@@ -12,6 +12,8 @@ interface Lobby {
   maxusers: number;
 }
 
+let lobbySocket: WebSocket;
+
 export default function Lobbies() {
   // State for the games sidebar
   const {getUser, getAuthToken, setupUser} = useAuth();
@@ -22,8 +24,6 @@ export default function Lobbies() {
   const [messages, setMessages] = useState<string[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState<string>("");
-
-  // const [currentLobby, setCurrentLobby] = useState<Lobby>();
 
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
 
@@ -69,8 +69,35 @@ export default function Lobbies() {
     }
   };
 
-  // Fetches current users games and lobbies, updates if user changes 
+  useEffect(() => {
 
+    if (!lobbySocket) {
+      lobbySocket = new WebSocket("wss://uvchtgqo14.execute-api.us-west-2.amazonaws.com/production/?jwttoken=" + getAuthToken());
+    }
+
+    lobbySocket.onmessage = (ev: MessageEvent<any>) => {
+      try {
+        const data = JSON.parse(ev.data);
+
+        if (data.suid && data.message && data.date) {
+          addMessage(data.suid + ": " + data.message);
+        }
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    lobbySocket.onclose = (ev: CloseEvent) => {
+      console.log("Closing lobbySocket due to " + ev.reason);
+    }
+
+    lobbySocket.onopen = () => {
+      console.log("Opening lobbySocket");
+    }
+  })
+
+  // Fetches current users games and lobbies, updates if user changes 
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -105,13 +132,21 @@ export default function Lobbies() {
   };
 
   const handleSendMessage = () => {
+    lobbySocket.send(JSON.stringify({
+      action: "sendmessage",
+      message: inputText,
+      suid: getUser().uuid,
+    }))
     addMessage("Me: " + inputText)
     setInputText("")
   };
 
   const handleCreateLobby = async () => {
     setShowCreateForm(!showCreateForm);
-    await fetchLobbies(currentGame.appid)
+
+    if (currentGame?.appid) {
+      await fetchLobbies(currentGame.appid)
+    }
   };
 
   const handleCurrentGame = async (currentGame: Game) => {
@@ -151,7 +186,7 @@ export default function Lobbies() {
       </div>
 
        {/* Handles Create Lobby Form*/}
-       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} gameId={currentGame.appid} />}
+       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} gameId={currentGame?.appid} />}
     </div>
   );
 }
