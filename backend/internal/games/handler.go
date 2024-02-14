@@ -40,6 +40,10 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
+				Headers: map[string]string{
+					"Access-Control-Allow-Origin":      "*",
+					"Access-Control-Allow-Credentials": "true",
+				},
 			}, nil
 		}
 
@@ -47,6 +51,10 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
+				Headers: map[string]string{
+					"Access-Control-Allow-Origin":      "*",
+					"Access-Control-Allow-Credentials": "true",
+				},
 			}, nil
 		}
 
@@ -57,6 +65,10 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
+				Headers: map[string]string{
+					"Access-Control-Allow-Origin":      "*",
+					"Access-Control-Allow-Credentials": "true",
+				},
 			}, nil
 		}
 
@@ -68,5 +80,9 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(responseBody),
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin":      "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
 	}, nil
 }

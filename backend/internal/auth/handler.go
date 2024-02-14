@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -126,9 +127,58 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		// Create a DynamoDB client
 		client := dynamodb.NewFromConfig(config)
 
+		// get additional user data from steam api
+		userInfoURL := "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?"
+		steamAPIKey := os.Getenv("STEAM_API_KEY")
+
+		queryParams := url.Values{
+			"key":                       {steamAPIKey},
+			"steamids":                   {id},
+		}
+
+		userInfoAPIURL := userInfoURL + queryParams.Encode()
+
+		resp, err := http.Get(userInfoAPIURL)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Headers: map[string]string{
+					"Access-Control-Allow-Origin":      "*",
+					"Access-Control-Allow-Credentials": "true",
+				},
+			}, nil
+		}
+
+		userDataBodyJson, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Headers: map[string]string{
+					"Access-Control-Allow-Origin":      "*",
+					"Access-Control-Allow-Credentials": "true",
+				},
+			}, nil
+		}
+
+		userDataBody := util.SteamGetPlayerSummariesBody{}
+
+		err = json.Unmarshal(userDataBodyJson, &userDataBody)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusAlreadyReported,
+				Body:	   string(userDataBodyJson),
+				Headers: map[string]string{
+					"Access-Control-Allow-Origin":      "*",
+					"Access-Control-Allow-Credentials": "true",
+				},
+			}, nil
+		}
+
 		userAcc := model.User{
 			SteamUUID:   id,
 			CreatedDate: time.Now().UTC().String(),
+			PersonName: userDataBody.Response.Players[0].PersonaName,
+			AvatarFull: userDataBody.Response.Players[0].AvatarFull,
 		}
 
 		attrMap, err := attributevalue.MarshalMap(userAcc)

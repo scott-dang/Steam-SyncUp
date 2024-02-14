@@ -21,3 +21,12 @@ type SteamGetOwnedGamesBody struct {
 		Games     []model.Game `json:"games"`
 	} `json:"response"`
 }
+
+type SteamGetPlayerSummariesBody struct {
+	Response struct {
+		Players []struct {
+			AvatarFull string `json:"avatarfull"`
+			PersonaName string `json:"personaname"`
+		} `json:"players"`
+	} `json:"response"`
+}
