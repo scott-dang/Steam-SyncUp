@@ -26,6 +26,8 @@ const defaultUser: User = {
 	jwttoken: "",
 	uuid: "",
 	games: [],
+  avatarfull: "",
+  personaname: "",
 };
 
 const loadSavedUser = (): User => {
