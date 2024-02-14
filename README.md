@@ -13,6 +13,9 @@ Steam SyncUp enables users to find and join a game community, tailored to their 
 ## Requirements
 A modern web browser with stable internet connection is needed along with a Steam account that has _game details_ set to public.
 
+## Access
+Link to website: https://main.d25wlrzzqu2q9m.amplifyapp.com
+
 ## Current functionality
 
 - Login with Steam (Must have public accout)
