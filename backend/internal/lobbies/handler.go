@@ -40,10 +40,6 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusNotFound,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 }
@@ -70,10 +66,6 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -86,10 +78,6 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"missing required parameters\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -99,10 +87,6 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"bad num of users\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -112,10 +96,6 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -132,10 +112,6 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"user already owns a lobby\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 
 	}
@@ -161,19 +137,11 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
 	}, nil
 }
 
@@ -189,10 +157,6 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -204,10 +168,6 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"missing required parameters\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -217,10 +177,6 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -239,10 +195,6 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -252,10 +204,6 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -264,20 +212,12 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(responseBody),
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
 	}, nil
 }
 
@@ -297,10 +237,6 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -313,10 +249,6 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"missing required parameters\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -326,10 +258,6 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -346,10 +274,6 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -359,10 +283,6 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -370,10 +290,6 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusForbidden,
 			Body:       "{ \"error\": \"lobby is full\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -398,19 +314,11 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
 	}, nil
 }
 
@@ -429,10 +337,6 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -445,10 +349,6 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"missing required parameters\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -458,10 +358,6 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -480,19 +376,11 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
 				Body:       "{ \"error\": \"" + err.Error() + "\" }",
-				Headers: map[string]string{
-					"Access-Control-Allow-Origin":      "*",
-					"Access-Control-Allow-Credentials": "true",
-				},
 			}, nil
 		}
 
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusOK,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -517,19 +405,11 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
 	}, nil
 }
 
@@ -548,10 +428,6 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusUnauthorized,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -563,10 +439,6 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"missing required parameters\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -576,10 +448,6 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
@@ -604,18 +472,10 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			Headers: map[string]string{
-				"Access-Control-Allow-Origin":      "*",
-				"Access-Control-Allow-Credentials": "true",
-			},
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
 	}, nil
 }
