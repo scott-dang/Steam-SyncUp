@@ -1,6 +1,5 @@
 import '../App.css';
 import Header from '../components/header';
-import AllLobbies from '../components/lobbies.json'
 import CreateLobbyForm from '../components/createlobbyform'
 import React, {useEffect, useRef, useState } from 'react';
 import { Game, getGameImageUrl} from '../utilities';
@@ -19,21 +18,61 @@ export default function Lobbies() {
   const [gameResults, setGameResults] = useState<Game[]>([]);
 
   // Chat and game states
-  const [currentGame, setCurrentGame] = useState<String>("");
+  const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const [messages, setMessages] = useState<string[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState<string>("");
 
-  const [currentLobby, setCurrentLobby] = useState<Lobby>();
+  // const [currentLobby, setCurrentLobby] = useState<Lobby>();
 
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
 
   // State for creating lobby 
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  // Fetches current users games and lobbies, updates if user changes 
-  useEffect(() => {
+  const fetchLobbies = async (gameId: number | null) => {
+    const lobbiesServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/GetLobbies?")
+    
+    if (gameId) {
+      lobbiesServiceEndpointURL.searchParams.set("game", gameId.toString())
+    }
 
+    try {
+      console.log("Fetching lobbies")
+      const resp = await fetch(lobbiesServiceEndpointURL, {
+        headers: {
+          "authorization": "Bearer " + getAuthToken(),
+        }
+      });
+
+      const data = await resp.json();
+
+      if (data) {
+        const lobbies: Lobby[] = data.map((lobbyData: any) => {
+          const lobby: Lobby = {
+            name: lobbyData.lobbyname,
+            leader: lobbyData.leader,
+            users: lobbyData.lobbyusers,
+            maxusers: lobbyData.maxusers
+          }
+          return lobby;
+        });
+        if (currentLobbyList) {
+          setCurrentLobbyList(lobbies)
+
+          // TODO:
+          // setCurrentLobby(currentLobbyList[0])
+        };
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetches current users games and lobbies, updates if user changes 
+
+
+  useEffect(() => {
     const fetchGames = async () => {
       try {
         setGameResults(getUser().games)
@@ -41,58 +80,21 @@ export default function Lobbies() {
         console.error(err);
       }
     };
-
-    const fetchLobbies = async () => {
-      const lobbiesServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/GetLobbies?game=400")
-      try {
-
-        console.log("Fetching lobbies")
-        const resp = await fetch(lobbiesServiceEndpointURL, {
-          headers: {
-            "authorization": "Bearer " + getAuthToken(),
-          }
-        });
-        
-        const data = await resp.json();
-
-        if (data) {
-
-          const lobbies: Lobby[] = data.map((lobbyData: any) => {
-
-            const lobby: Lobby = {
-              name: lobbyData.lobbyname,
-              leader: lobbyData.leader,
-              users: lobbyData.lobbyusers,
-              maxusers: lobbyData.maxusers
-            }
-
-            return lobby;
-          });
-          
-          if (currentLobbyList) {
-            
-            setCurrentLobbyList(lobbies)
-            setCurrentLobby(currentLobbyList[0])
-            
-          };
-
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
+    
     fetchGames();
-
-    fetchLobbies();
-
-  }, [getAuthToken, getUser, setupUser]);
+  }, [getAuthToken, getUser, setupUser, showCreateForm]);
 
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
+
+  useEffect(() => {
+    if (gameResults.length > 0) {
+      setCurrentGame(gameResults[0]); // Set currentGame to the first element of gameResults
+    }
+  }, [gameResults]);
  
   const addMessage = (message: string) => {
     setMessages(prevMessages => [message, ...prevMessages]);
@@ -100,20 +102,22 @@ export default function Lobbies() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value)
-  }
+  };
 
   const handleSendMessage = () => {
     addMessage("Me: " + inputText)
     setInputText("")
-  }
-
-  const handleCreateLobby = () => {
-  setShowCreateForm(!showCreateForm);
   };
 
-  const handleCurrentGame = (current: string) => {
-    setCurrentGame(current)
-  }
+  const handleCreateLobby = async () => {
+    setShowCreateForm(!showCreateForm);
+    await fetchLobbies(currentGame.appid)
+  };
+
+  const handleCurrentGame = async (currentGame: Game) => {
+    setCurrentGame(currentGame)
+    await fetchLobbies(currentGame.appid)
+  };
 
   return (
     <div className="overflow-hidden h-screen">
@@ -128,13 +132,13 @@ export default function Lobbies() {
         <GamesList gameResults={gameResults} handleCurrentGame={handleCurrentGame} />
 
         {/* Lobbies list component */}
-        <LobbiesList currentLobbyList={currentLobbyList} handleCreateLobby={handleCreateLobby} />
+        <LobbiesList currentLobbyList={currentLobbyList} showCreateForm={showCreateForm} handleCreateLobby={handleCreateLobby} />
 
         <div className="flex flex-col bg-[#1A1A1A] w-full">
 
           {/* Current seleceted game header */}
           <div className="bg-[#212121] h-20 text-white font-bold text-4xl">
-            {currentGame}
+            {currentGame && currentGame.name}
           </div>
 
           {/* Scrolling chat area */}
@@ -147,31 +151,48 @@ export default function Lobbies() {
       </div>
 
        {/* Handles Create Lobby Form*/}
-       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} />}
+       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} gameId={currentGame.appid} />}
     </div>
   );
 }
 
 // Games list component
-const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (current: string) => void }> = ({ gameResults, handleCurrentGame }) => {
+const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame: Game) => void }> = ({ gameResults, handleCurrentGame }) => {
   return (
-    <div className="bg-[#4C4C4C] w-1/4 text-xl font-bold  overflow-y-auto"> 
-      <p className="pt-2 text-center">
+    <div className="bg-[#4C4C4C] w-1/4 text-xl font-bold overflow-y-auto"> 
+      <p className="pt-2 text-center text-white">
         Games
       </p>
-      <hr className="h-px mb-8 mt-4 bg-white border-0 dark:bg-gray-500"/>
+      <hr className="h-px mb-4 mt-4 bg-white border-0 dark:bg-gray-500"/>
       <ul className=''>
         {gameResults && gameResults.map(game => 
-          <li className='font-normal text-sm'>
-            <button className='flex pl-2 items-center' onClick={() => handleCurrentGame(game.name)}>
+          <li key={game.appid} className='font-normal' 
+          style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
+            backgroundSize: "cover",
+            backdropFilter: "blur(5px)",
+          }}
+          onClick={() => handleCurrentGame(game)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 0 8px 4px black inset";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+          >
+
+            <div className='flex flex-row items-center pl-2 pt-5'>
               <img 
-                className='w-10'
-                src={getGameImageUrl(game.appid, game.img_icon_url)} 
-                alt={"Thumbnail of " + game.name}>
-              </img>
-              <p className='ml-2'>{game.name}</p>
-            </button>
-            <hr className="h-px my-8 bg-white border-0 dark:bg-gray-500"/>
+                  className='w-10 rounded-md'
+                  src={getGameImageUrl(game.appid, game.img_icon_url)} 
+                  alt={"Thumbnail of " + game.name}
+              />
+              <p className='ml-2 text-white text-sm font-bold'>{game.name}</p>
+            </div>
+             
+            <hr className="h-px my-4 bg-white border-0 dark:bg-gray-500"/>
           </li>
         )}
       </ul>
@@ -180,7 +201,7 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (current: str
 };
 
 // Lobbies list component
-const LobbiesList: React.FC<{ currentLobbyList: Lobby[], handleCreateLobby: () => void }> = ({ currentLobbyList, handleCreateLobby }) => {
+const LobbiesList: React.FC<{ currentLobbyList: Lobby[], showCreateForm: boolean, handleCreateLobby: () => void }> = ({ currentLobbyList, showCreateForm, handleCreateLobby }) => {
   return (
     <div className="bg-[#212121] w-1/4 text-xl font-bold"> 
       <p className="pt-2 text-center">
