@@ -14,7 +14,7 @@ import (
 
 type GamesServiceResponseBody struct {
   Authenticated bool `json:"authenticated"`
-  UUID      string `json:"uuid"`
+  UUID        string `json:"uuid"`
 }
 
 func Handler(context context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
