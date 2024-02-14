@@ -8,12 +8,15 @@ function Settings() {
 	return (
 		<div className="bg-[#1A1A1A] h-screen text-white">
 			<Header></Header>
-			<span className="text-4xl">Settings</span>
-			<img
-				src={getUser().avatarfull}
-				alt={"avatar"}
-				className="w-full h-w mb-3 rounded-lg"
-			/>
+			<div className="px-5">
+				<h1 className="text-3xl mb-2">Settings</h1>
+				<text>Logged in as {getUser().personaname}</text>
+				<img
+					src={getUser().avatarfull}
+					alt={"avatar"}
+					className="w-60 h-w rounded-lg"
+				/>
+			</div>
 		</div>
 	);
 }
