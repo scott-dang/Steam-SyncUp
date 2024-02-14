@@ -9,31 +9,14 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/scott-dang/Steam-SyncUp/pkg/model"
 	"github.com/scott-dang/Steam-SyncUp/pkg/util"
 )
-
-type GamesServiceResponseBody struct {
-	Authenticated	bool `json:"authenticated"`
-	UUID	 		string `json:"uuid"`
-	ListOfGames struct {
-		GameCount int `json:"game_count"`
-		Games     []model.Game `json:"games"`
-	} `json:"list_of_games"`
-}
-
-type SteamGetOwnedGamesBody struct {
-	Response struct {
-		GameCount int `json:"game_count"`
-		Games     []model.Game `json:"games"`
-	} `json:"response"`
-}
 
 func Handler(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// if it is a successful authentication, then you get a user, otherwise you get an error
 	user, err := util.Authenticate(request, context)
 
-	body := GamesServiceResponseBody{
+	body := util.GamesServiceResponseBody{
 		Authenticated: false,
 	}
 
@@ -57,10 +40,6 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
     if err != nil {
       return events.APIGatewayProxyResponse{
         StatusCode: http.StatusInternalServerError,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
       }, nil
     }
 
@@ -68,24 +47,16 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
     if err != nil {
       return events.APIGatewayProxyResponse{
         StatusCode: http.StatusInternalServerError,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
       }, nil
     }
 
-    getOwnedGamesBody := SteamGetOwnedGamesBody{}
+    getOwnedGamesBody := util.SteamGetOwnedGamesBody{}
 
     err = json.Unmarshal(getOwnedGamesBodyJson, &getOwnedGamesBody)
 
     if err != nil {
       return events.APIGatewayProxyResponse{
         StatusCode: http.StatusInternalServerError,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
       }, nil
     }
 
@@ -97,9 +68,5 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(responseBody),
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
 	}, nil
 }

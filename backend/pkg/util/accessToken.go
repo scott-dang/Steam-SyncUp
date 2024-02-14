@@ -109,6 +109,17 @@ func Authenticate(request events.APIGatewayProxyRequest, context context.Context
 	return GetUserFromToken(token, context)
 }
 
+func Authenticate_Websocket(request events.APIGatewayWebsocketProxyRequest, context context.Context) (model.User, error) {
+
+  token, ok := request.QueryStringParameters["jwttoken"]
+
+  if !ok {
+		return model.User{}, fmt.Errorf("invalid body format")
+  }
+
+	return GetUserFromToken(token, context)
+}
+
 func GetUserFromToken(tokenString string, context context.Context) (model.User, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("mySecret"), nil
