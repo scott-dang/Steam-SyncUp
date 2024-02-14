@@ -1,4 +1,4 @@
-package chatconnect
+package chatdisconnect
 
 import (
 	"context"
@@ -9,16 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/scott-dang/Steam-SyncUp/pkg/util"
 )
 
 func Handler(context context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
-
-	_, err := util.Authenticate_Websocket(request, context)
-
-	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusUnauthorized}, err
-	}
 
 	connectionId := request.RequestContext.ConnectionID
 
@@ -32,8 +25,8 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 	// TODO: Make this support multiple lobbies and not just 1
 	tableName := os.Getenv("table")
 
-	_, err = svc.PutItem(context, &dynamodb.PutItemInput{
-		Item: map[string]types.AttributeValue{
+	_, err = svc.DeleteItem(context, &dynamodb.DeleteItemInput{
+		Key: map[string]types.AttributeValue{
 			"connectionId": &types.AttributeValueMemberS{Value: connectionId},
 		},
 		TableName: &tableName,
