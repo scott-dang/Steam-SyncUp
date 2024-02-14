@@ -99,12 +99,23 @@ var validToken = func(found string, expected string) bool {
 
 func Authenticate(request events.APIGatewayProxyRequest, context context.Context) (model.User, error) {
 	split := strings.Split(request.Headers["authorization"], "Bearer ")
-	
+
 	if len(split) != 2 {
 		return model.User{}, fmt.Errorf("no token")
 	}
-	
+
 	token := split[1]
+
+	return GetUserFromToken(token, context)
+}
+
+func Authenticate_Websocket(request events.APIGatewayWebsocketProxyRequest, context context.Context) (model.User, error) {
+
+	token, ok := request.QueryStringParameters["jwttoken"]
+
+	if !ok {
+		return model.User{}, fmt.Errorf("invalid body format")
+	}
 
 	return GetUserFromToken(token, context)
 }
