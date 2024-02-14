@@ -1,75 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MoonLoader } from 'react-spinners';
-import Header from '../components/header';
-import { useAuth } from '../context/AuthContext';
-import { authServiceEndpointURL, AuthServiceResponse, fetchGamesServiceAPI, GamesServiceResponse, User } from '../utilities';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MoonLoader } from "react-spinners";
+import Header from "../components/header";
+import { useAuth } from "../context/AuthContext";
+import {
+	authServiceEndpointURL,
+	AuthServiceResponse,
+	fetchGamesServiceAPI,
+	fetchUsersServiceAPI,
+	GamesServiceResponse,
+	User,
+	UsersServiceResponse,
+} from "../utilities";
 
-const authEndpointParams: URLSearchParams = new URLSearchParams(window.location.search);
+const authEndpointParams: URLSearchParams = new URLSearchParams(
+	window.location.search
+);
 
 function Auth() {
+	const { isLoggedIn, getAuthToken, login } = useAuth();
+	const navigate = useNavigate();
 
-  const { isLoggedIn, getAuthToken, login } = useAuth();
-  const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+	const fetchAuthenticationStatus = async () => {
+		const authEndpointURLWithParams: URL = authServiceEndpointURL;
+		authEndpointParams.set("openid.mode", "check_authentication");
+		authServiceEndpointURL.search = authEndpointParams.toString();
 
-  const fetchAuthenticationStatus = async () => {
-    const authEndpointURLWithParams: URL = authServiceEndpointURL;
-    authEndpointParams.set("openid.mode", "check_authentication");
-    authServiceEndpointURL.search = authEndpointParams.toString();
+		setIsLoading(true);
 
-    setIsLoading(true);
+		const resp = await fetch(authEndpointURLWithParams);
+		const data = await resp.json();
 
-    const resp = await fetch(authEndpointURLWithParams);
-    const data = await resp.json();
+		return data;
+	};
 
-    return data;
-  }
+	useEffect(() => {
+		(async () => {
+			const authData: AuthServiceResponse =
+				await fetchAuthenticationStatus();
 
-  useEffect(() => {
+			if (authData.is_valid === true) {
+				const gamesServiceData: GamesServiceResponse | null =
+					await fetchGamesServiceAPI(authData.jwttoken);
+				const usersServiceData: UsersServiceResponse | null =
+					await fetchUsersServiceAPI(authData.jwttoken);
 
-    (async () => {
-      const authData: AuthServiceResponse = await fetchAuthenticationStatus();
+				if (gamesServiceData !== null) {
+					const user: User = {
+						authenticated: true,
+						uuid: gamesServiceData.uuid,
+						jwttoken: authData.jwttoken,
+						games: gamesServiceData.list_of_games.games,
+						personaname: usersServiceData?.personaname || "",
+						avatarfull: usersServiceData?.avatarfull || "",
+					};
 
-      if (authData.is_valid === true) {
-        const gamesServiceData: GamesServiceResponse | null = await fetchGamesServiceAPI(authData.jwttoken);
+					login(JSON.stringify(user));
+				}
+			}
 
-        if (gamesServiceData !== null) {
+			if (isLoggedIn()) {
+				navigate("/lobbies");
+			}
+		})();
 
-          const user: User = {
-            authenticated: true,
-            uuid: gamesServiceData.uuid,
-            jwttoken: authData.jwttoken,
-            games: gamesServiceData.list_of_games.games,
-          }
+		const authTimeout = setTimeout(() => {
+			setIsLoading(false);
+			navigate("/");
+			alert("Login failed!");
+		}, 3500);
 
-          login(JSON.stringify(user));
-        }
-      }
+		return () => clearTimeout(authTimeout);
+	}, [navigate, login, getAuthToken, isLoggedIn]);
 
-      if (isLoggedIn()) {
-        navigate("/lobbies");
-      }
-    })();
-
-    const authTimeout = setTimeout(() => {
-      setIsLoading(false);
-      navigate("/");
-      alert("Login failed!")
-    }, 3500)
-
-    return () => clearTimeout(authTimeout);
-  }, [navigate, login, getAuthToken, isLoggedIn])
-
-  return (
-    <div className="bg-[#1A1A1A] h-screen flex flex-col">
-      <Header />
-      <div className="flex-grow flex justify-center items-center">
-        <MoonLoader color="#9e9fa2" size={"100px"} loading={isLoading}/>
-      </div>
-    </div>
-  )
+	return (
+		<div className="bg-[#1A1A1A] h-screen flex flex-col">
+			<Header />
+			<div className="flex-grow flex justify-center items-center">
+				<MoonLoader
+					color="#9e9fa2"
+					size={"100px"}
+					loading={isLoading}
+				/>
+			</div>
+		</div>
+	);
 }
 
 export default Auth;

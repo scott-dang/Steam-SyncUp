@@ -1,13 +1,24 @@
-import React from 'react';
-import Header from '../components/header';
+import React from "react";
+import Header from "../components/header";
+import { useAuth } from "../context/AuthContext";
 
 function Settings() {
-  return (
-    <div className="bg-[#1A1A1A] h-screen text-white">
-      <Header></Header>
-      <span className='text-8xl'>This is the settings page</span>
-    </div>
-  );
+	const { getUser } = useAuth();
+
+	return (
+		<div className="bg-[#1A1A1A] h-screen text-white">
+			<Header></Header>
+			<div className="px-5">
+				<h1 className="text-3xl mb-2">Settings</h1>
+				<text>Logged in as {getUser().personaname}</text>
+				<img
+					src={getUser().avatarfull}
+					alt={"avatar"}
+					className="w-60 h-w rounded-lg"
+				/>
+			</div>
+		</div>
+	);
 }
 
 export default Settings;
