@@ -30,3 +30,8 @@ type SteamGetPlayerSummariesBody struct {
 		} `json:"players"`
 	} `json:"response"`
 }
+
+type UsersServiceProfileInfoResponseBody struct {
+	AvatarFull string `json:"avatarfull"`
+	PersonaName string `json:"personaname"`
+}
