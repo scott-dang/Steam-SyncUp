@@ -18,6 +18,11 @@ export interface AuthServiceResponse {
 	jwttoken: string;
 }
 
+export interface UsersServiceResponse {
+	avatarfull: string;
+	personaname: string;
+}
+
 export interface ListOfGames {
 	game_count: number;
 	games: Game[];
@@ -76,6 +81,29 @@ export const fetchGamesServiceAPI = async (
 	return null;
 };
 
+export const fetchUsersServiceAPI = async (
+	authToken: string
+): Promise<UsersServiceResponse | null> => {
+	try {
+		const resp = await fetch(usersServiceEndpointURL, {
+			headers: {
+				authorization: "Bearer " + authToken,
+			},
+		});
+
+		const data = await resp.json();
+
+		if (data?.personaname) {
+			const usersServiceResponse: UsersServiceResponse = data;
+			return usersServiceResponse;
+		}
+	} catch (err) {
+		console.error(err);
+	}
+
+	return null;
+};
+
 export const steamOpenIdEndpointUrl = (): URL => {
 	const url: URL = new URL("https://steamcommunity.com/openid/login");
 	url.search = new URLSearchParams({
@@ -97,4 +125,8 @@ export const authServiceEndpointURL: URL = new URL(
 
 export const gamesServiceEndpointURL: URL = new URL(
 	"https://zffdaxx75j.execute-api.us-west-2.amazonaws.com/default/GamesService"
+);
+
+export const usersServiceEndpointURL: URL = new URL(
+	"https://1teuwfqobe.execute-api.us-west-2.amazonaws.com/default/UsersService"
 );
