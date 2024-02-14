@@ -1,27 +1,27 @@
 package chatconnect
 
 import (
-	"context"
-	"net/http"
-	"os"
+  "context"
+  "net/http"
+  "os"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/scott-dang/Steam-SyncUp/pkg/util"
+  "github.com/aws/aws-lambda-go/events"
+  "github.com/aws/aws-sdk-go-v2/config"
+  "github.com/aws/aws-sdk-go-v2/service/dynamodb"
+  "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+  "github.com/scott-dang/Steam-SyncUp/pkg/util"
 )
 
 type GamesServiceResponseBody struct {
-	Authenticated	bool `json:"authenticated"`
-	UUID	 		string `json:"uuid"`
+  Authenticated bool `json:"authenticated"`
+  UUID      string `json:"uuid"`
 }
 
 func Handler(context context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	_, err := util.Authenticate_Websocket(request, context)
+  _, err := util.Authenticate_Websocket(request, context)
 
-	if err != nil {
+  if err != nil {
     return events.APIGatewayProxyResponse{StatusCode: http.StatusUnauthorized}, err
   }
 
@@ -48,7 +48,7 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
     return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError}, err
   }
 
-	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-	}, nil
+  return events.APIGatewayProxyResponse{
+    StatusCode: http.StatusOK,
+  }, nil
 }
