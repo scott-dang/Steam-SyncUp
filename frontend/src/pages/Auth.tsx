@@ -18,7 +18,7 @@ const authEndpointParams: URLSearchParams = new URLSearchParams(
 );
 
 function Auth() {
-	const { isLoggedIn, getAuthToken, login } = useAuth();
+	const { isLoggedIn, login, logout } = useAuth();
 	const navigate = useNavigate();
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -70,10 +70,11 @@ function Auth() {
 			setIsLoading(false);
 			navigate("/");
 			alert("Login failed!");
-		}, 3500);
+      logout();
+		}, 6000);
 
 		return () => clearTimeout(authTimeout);
-	}, [navigate, login, getAuthToken, isLoggedIn]);
+	});
 
 	return (
 		<div className="bg-[#1A1A1A] h-screen flex flex-col">
