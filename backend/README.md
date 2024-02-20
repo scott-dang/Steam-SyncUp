@@ -25,6 +25,7 @@ You must have AWS CLI installed to run the command, and Windows you need 7-Zip t
 ## Testing
 - Unit tests will be created in parallel in the same directory with the code they are testing on. For example, if unit testing `handlerA.go`, we can create a test file suffixed with _test like so, `handlerA_test.go`  before running `go test`.
 - Integration tests can be created in its own directory as its responsibility is across multiple directories / files.
+- To run the build and testing workflow for the backend, execute `.github/workflows/scripts/backend-build.sh` in the root directory of the project
 
 ## Additional Notes
 
