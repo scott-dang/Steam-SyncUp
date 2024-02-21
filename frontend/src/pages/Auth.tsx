@@ -40,7 +40,6 @@ function Auth() {
 		(async () => {
 			const authData: AuthServiceResponse =
 				await fetchAuthenticationStatus();
-
 			if (authData.is_valid === true) {
 				const gamesServiceData: GamesServiceResponse | null =
 					await fetchGamesServiceAPI(authData.jwttoken);
@@ -70,7 +69,7 @@ function Auth() {
 			setIsLoading(false);
 			navigate("/");
 			alert("Login failed!");
-      logout();
+			logout();
 		}, 6000);
 
 		return () => clearTimeout(authTimeout);
