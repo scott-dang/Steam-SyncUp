@@ -10,11 +10,12 @@ import (
 )
 
 var getUser = util.GetUser
+var authenticate = util.Authenticate
 
 // should have queryStringParameter "uuid"--the user we are looking up
 func Handler(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// if it is a successful authentication, then you get a user, otherwise you get an error
-	user, err := util.Authenticate(request, context)
+	user, err := authenticate(request, context)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
