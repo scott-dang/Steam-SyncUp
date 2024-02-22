@@ -116,8 +116,8 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		steamAPIKey := os.Getenv("STEAM_API_KEY")
 
 		queryParams := url.Values{
-			"key":                       {steamAPIKey},
-			"steamids":                   {id},
+			"key":      {steamAPIKey},
+			"steamids": {id},
 		}
 
 		userInfoAPIURL := userInfoURL + queryParams.Encode()
@@ -142,15 +142,15 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusAlreadyReported,
-				Body:	   string(userDataBodyJson),
+				Body:       string(userDataBodyJson),
 			}, nil
 		}
 
 		userAcc := model.User{
 			SteamUUID:   id,
 			CreatedDate: time.Now().UTC().String(),
-			PersonName: userDataBody.Response.Players[0].PersonaName,
-			AvatarFull: userDataBody.Response.Players[0].AvatarFull,
+			PersonName:  userDataBody.Response.Players[0].PersonaName,
+			AvatarFull:  userDataBody.Response.Players[0].AvatarFull,
 		}
 
 		attrMap, err := attributevalue.MarshalMap(userAcc)
