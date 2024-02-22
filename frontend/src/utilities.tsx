@@ -82,10 +82,14 @@ export const fetchGamesServiceAPI = async (
 };
 
 export const fetchUsersServiceAPI = async (
-	authToken: string
+	authToken: string,
+	uuid?: string
 ): Promise<UsersServiceResponse | null> => {
 	try {
-		const resp = await fetch(usersServiceEndpointURL, {
+		const url = uuid
+			? `${usersServiceEndpointURL}?uuid=${uuid}`
+			: usersServiceEndpointURL;
+		const resp = await fetch(url, {
 			headers: {
 				authorization: "Bearer " + authToken,
 			},
