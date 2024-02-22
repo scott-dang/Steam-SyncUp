@@ -198,14 +198,14 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame:
       <p className="pt-2 text-center text-white">
         Games
       </p>
-      <hr className="h-px mb-4 mt-4 bg-white border-0 dark:bg-gray-500"/>
-      <ul className=''>
+      <ul className='pt-5'>
         {gameResults && gameResults.map(game => 
-          <li key={game.appid} className='font-normal' 
+          <li key={game.appid} className='font-normal rounded-xl mb-5 mx-2' 
           style={{
             backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
             backgroundSize: "cover",
             backdropFilter: "blur(5px)",
+            transition: "transform 0.1s ease, box-shadow 0.3s ease",
           }}
           onClick={() => handleCurrentGame(game)}
           onMouseEnter={(e) => {
@@ -218,16 +218,15 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame:
           }}
           >
 
-            <div className='flex flex-row items-center pl-2 pt-5'>
+            <div className='flex flex-row items-center p-2'>
               <img 
                   className='w-10 rounded-md'
                   src={getGameImageUrl(game.appid, game.img_icon_url)} 
                   alt={"Thumbnail of " + game.name}
               />
-              <p className='ml-2 text-white text-sm font-bold'>{game.name}</p>
+              <p className='text-white text-sm font-bold'>{game.name}</p>
             </div>
              
-            <hr className="h-px my-4 bg-white border-0 dark:bg-gray-500"/>
           </li>
         )}
       </ul>
