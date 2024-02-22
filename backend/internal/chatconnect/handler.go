@@ -43,19 +43,19 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
 	}
 
-  _, err = svc.PutItem(context, &dynamodb.PutItemInput{
+	_, err = svc.PutItem(context, &dynamodb.PutItemInput{
 		TableName: aws.String("Connections"),
-		Item:      map[string]types.AttributeValue{
-      "connectionId": &types.AttributeValueMemberS{Value: connectionId},
-      "leader": &types.AttributeValueMemberS{Value: leader},
-      "appid": &types.AttributeValueMemberN{Value: appid},
-    },
+		Item: map[string]types.AttributeValue{
+			"connectionId": &types.AttributeValueMemberS{Value: connectionId},
+			"leader":       &types.AttributeValueMemberS{Value: leader},
+			"appid":        &types.AttributeValueMemberN{Value: appid},
+		},
 	})
 
-  if err != nil {
+	if err != nil {
 		fmt.Println("Error putting connectionId in ddb")
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError}, err
-  }
+	}
 
 	_, err = svc.UpdateItem(context, &dynamodb.UpdateItemInput{
 		TableName: aws.String("Lobbies"),
