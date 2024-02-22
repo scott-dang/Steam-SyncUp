@@ -172,9 +172,15 @@ export default function Lobbies() {
         <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
 
           {/* Current seleceted game header */}
-          <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl  border border-graysecondary rounded-3xl">
+          {currentGame &&
+          <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${currentGame.appid}/header.jpg)`,
+            backgroundSize: "fit",
+          }}>
             {currentGame && currentGame.name}
           </div>
+          }
 
           {/* Scrolling chat area */}
           <ChatArea messages={messages} chatRef={chatRef} />
