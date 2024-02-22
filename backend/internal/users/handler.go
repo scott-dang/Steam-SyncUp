@@ -38,7 +38,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	}
 
 	body := util.UsersServiceProfileInfoResponseBody{
-		AvatarFull: user.AvatarFull,
+		AvatarFull:  user.AvatarFull,
 		PersonaName: user.PersonName,
 	}
 
