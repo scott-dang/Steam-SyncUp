@@ -169,10 +169,10 @@ export default function Lobbies() {
         {/* Lobbies list component */}
         <LobbiesList currentLobbyList={currentLobbyList} showCreateForm={showCreateForm} handleCreateLobby={handleCreateLobby} />
 
-        <div className="flex flex-col bg-[#1A1A1A] w-full">
+        <div className="flex flex-col bg-grayprimary w-full">
 
           {/* Current seleceted game header */}
-          <div className="bg-[#212121] h-20 text-white font-bold text-4xl">
+          <div className="bg-graysecondary h-20 text-white font-bold text-4xl">
             {currentGame && currentGame.name}
           </div>
 
@@ -194,7 +194,7 @@ export default function Lobbies() {
 // Games list component
 const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame: Game) => void }> = ({ gameResults, handleCurrentGame }) => {
   return (
-    <div className="bg-[#4C4C4C] w-1/4 text-xl font-bold overflow-y-auto"> 
+    <div className="bg-graysecondary w-1/4 text-xl font-bold overflow-y-auto"> 
       <p className="pt-2 text-center text-white">
         Games
       </p>
@@ -238,7 +238,7 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame:
 // Lobbies list component
 const LobbiesList: React.FC<{ currentLobbyList: Lobby[], showCreateForm: boolean, handleCreateLobby: () => void }> = ({ currentLobbyList, showCreateForm, handleCreateLobby }) => {
   return (
-    <div className="bg-[#212121] w-1/4 text-xl font-bold"> 
+    <div className="bg-graysecondary w-1/4 text-xl font-bold"> 
       <p className="pt-2 text-center">
         Lobbies
       </p>

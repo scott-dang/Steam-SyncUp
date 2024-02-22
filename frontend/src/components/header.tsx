@@ -88,7 +88,7 @@ export default function Header() {
   }
 
   return (
-    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-[#222222]">
+    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-grayprimary">
       <Link className="text-white text-3xl cursor-pointer" to="/">
         Steam SyncUp
       </Link>
