@@ -245,12 +245,12 @@ const LobbiesList: React.FC<{ currentLobbyList: Lobby[], showCreateForm: boolean
       <ul className='pt-2'>
         <ul className='my-4 flex items-center justify-center'>
           <button 
-            className="text-white text-xs bg-transparent border border-white py-2 text-center focus:outline-none w-full" 
+            className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl m-2 py-2 text-center focus:outline-none w-full" 
             onClick={handleCreateLobby}>
             Create Lobby
           </button>
           <button 
-            className='text-white text-xs bg-transparent border border-white py-2 text-center focus:outline-none w-full'>
+            className='text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl m-2 py-2 text-center focus:outline-none w-full'>
             My Lobby
           </button>
         </ul>
@@ -260,7 +260,7 @@ const LobbiesList: React.FC<{ currentLobbyList: Lobby[], showCreateForm: boolean
             <div className="flex mx-2 text-white text-xs items-center">
               <p>{lobby.name}</p>
               <button className='ml-auto pl-2'>
-                <button className='bg-transparent border border-white rounded-full px-6 py-1 text-center focus:outline-none ml-2'>join</button>
+                <button className='bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-6 py-1 text-center focus:outline-none ml-2'>join</button>
               </button>
               <p className="ml-2">{lobby.users.length} / {lobby.maxusers}</p> 
             </div>
@@ -300,6 +300,6 @@ const InputBox: React.FC<{
       }}
       className="w-full rounded-2xl border-2 border-gray-500 p-2 bg-transparent"
     />
-    <button className="bg-gray-700 text-white rounded-2xl px-4 py-2 ml-2" onClick={handleSendMessage}>Send</button>
+    <button className="bg-gray-700 text-white rounded-2xl px-4 py-2 ml-2 hover:bg-white hover:text-black" onClick={handleSendMessage}>Send</button>
   </div>
 );
