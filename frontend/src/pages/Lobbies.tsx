@@ -169,10 +169,10 @@ export default function Lobbies() {
         {/* Lobbies list component */}
         <LobbiesList currentLobbyList={currentLobbyList} showCreateForm={showCreateForm} handleCreateLobby={handleCreateLobby} />
 
-        <div className="flex flex-col bg-grayprimary w-full">
+        <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
 
           {/* Current seleceted game header */}
-          <div className="bg-graysecondary h-20 text-white font-bold text-4xl">
+          <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl  border border-graysecondary rounded-3xl">
             {currentGame && currentGame.name}
           </div>
 
@@ -194,8 +194,8 @@ export default function Lobbies() {
 // Games list component
 const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame: Game) => void }> = ({ gameResults, handleCurrentGame }) => {
   return (
-    <div className="bg-graysecondary w-1/4 text-xl font-bold overflow-y-auto"> 
-      <p className="pt-2 text-center text-white">
+    <div className="bg-grayprimary w-1/4 text-xl font-bold overflow-y-auto border border-graysecondary rounded-3xl"> 
+      <p className="p-2 text-center text-white bg-graysecondary rounded-xl m-2 drop-shad-xl">
         Games
       </p>
       <ul className='pt-5'>
@@ -237,25 +237,25 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame:
 // Lobbies list component
 const LobbiesList: React.FC<{ currentLobbyList: Lobby[], showCreateForm: boolean, handleCreateLobby: () => void }> = ({ currentLobbyList, showCreateForm, handleCreateLobby }) => {
   return (
-    <div className="bg-graysecondary w-1/4 text-xl font-bold"> 
-      <p className="pt-2 text-center">
+    <div className="bg-grayprimary w-1/4 text-xl font-bold border border-graysecondary rounded-3xl"> 
+      <p className="p-2 m-2 rounded-xl bg-graysecondary text-center">
         Lobbies
       </p>
-      <ul className='pt-2'>
-        <ul className='my-4 flex items-center justify-center'>
+      <ul className='py-2'>
+        <ul className='flex items-center justify-center'>
           <button 
-            className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl m-2 py-2 text-center focus:outline-none w-full" 
+            className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full" 
             onClick={handleCreateLobby}>
             Create Lobby
           </button>
           <button 
-            className='text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl m-2 py-2 text-center focus:outline-none w-full'>
+            className='text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full'>
             My Lobby
           </button>
         </ul>
 
         {currentLobbyList.map(lobby => 
-          <li className='font-normal text-sm'>
+          <li className='font-normal text-sm my-5'>
             <div className="flex mx-2 text-white text-xs items-center">
               <p>{lobby.name}</p>
               <button className='ml-auto pl-2'>
