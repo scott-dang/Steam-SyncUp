@@ -88,7 +88,7 @@ export default function Header() {
   }
 
   return (
-    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-[#222222]">
+    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-grayprimary">
       <Link className="text-white text-3xl cursor-pointer" to="/">
         Steam SyncUp
       </Link>
@@ -140,12 +140,12 @@ export default function Header() {
 
             {searchResults.length > 0 && (
               // Searchbar dropdown
-              <div className="absolute z-10 w-full bg-white rounded-md shadow-lg overflow-y-scroll max-h-[30vh]">
+              <div className="absolute z-10 w-full bg-graysecondary rounded-3xl shadow-lg overflow-y-scroll max-h-[30vh]">
 
                 {searchResults.map((game: Game, index) => (
                   <div
                     key={index}
-                    className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-black hover:bg-gray-100 cursor-pointer"
+                    className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-white hover:bg-grayprimary cursor-pointer"
                     onMouseDown={() => onSearchResultMouseDown(game)}
                   >
                     <img
