@@ -126,6 +126,7 @@ export default function Lobbies() {
       action: "sendmessage",
       message: inputText,
       suid: getUser().uuid,
+      personaname: getUser().personaname,
     }))
     addMessage("Me: " + inputText)
     setInputText("")
