@@ -170,7 +170,6 @@ export default function Lobbies() {
         <LobbiesList currentLobbyList={currentLobbyList} showCreateForm={showCreateForm} handleCreateLobby={handleCreateLobby} />
 
         <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
-
           {/* Current seleceted game header */}
           {currentGame &&
           <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
@@ -199,31 +198,38 @@ export default function Lobbies() {
 
 // Games list component
 const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame: Game) => void }> = ({ gameResults, handleCurrentGame }) => {
+  const [clicked, setClicked] = useState<number | null>(0); // Track the clicked element index
+
   return (
     <div className="bg-grayprimary w-1/4 text-xl font-bold overflow-y-auto border border-graysecondary rounded-3xl"> 
       <p className="p-2 text-center text-white bg-graysecondary rounded-xl m-2 drop-shad-xl">
         Games
       </p>
       <ul className='pt-5'>
-        {gameResults && gameResults.map(game => 
-          <li key={game.appid} className='font-normal rounded-xl mb-5 mx-2' 
-          style={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
-            backgroundSize: "cover",
-            backdropFilter: "blur(5px)",
-            transition: "transform 0.1s ease, box-shadow 0.3s ease",
-          }}
-          onClick={() => handleCurrentGame(game)}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)";
-            e.currentTarget.style.boxShadow = "0 0 8px 4px black inset";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
+        {gameResults && gameResults.map((game, index) => 
+          <li 
+            key={game.appid} 
+            className='font-normal rounded-xl mb-5 mx-2' 
+            style={{
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
+              backgroundSize: "cover",
+              backdropFilter: "blur(5px)",
+              transition: "transform 0.1s ease, box-shadow 0.3s ease",
+              boxShadow: index === clicked ? "0 0 1px 1px white inset" : "none",
+            }}
+            onClick={() => {
+              handleCurrentGame(game);
+              setClicked(index);
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.boxShadow = "0 0 8px 4px white inset";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = index === clicked ? "0 0 1px 1px white inset" : "none";
+            }}
           >
-
             <div className='flex flex-row items-center p-2'>
               <img 
                   className='w-10 rounded-md'
@@ -232,13 +238,13 @@ const GamesList: React.FC<{gameResults: Game[], handleCurrentGame: (currentGame:
               />
               <p className='text-white text-sm font-bold'>{game.name}</p>
             </div>
-             
           </li>
         )}
       </ul>
     </div>
-  )
+  );
 };
+
 
 // Lobbies list component
 const LobbiesList: React.FC<{ currentLobbyList: Lobby[], showCreateForm: boolean, handleCreateLobby: () => void }> = ({ currentLobbyList, showCreateForm, handleCreateLobby }) => {
