@@ -7,6 +7,6 @@ type User struct {
 	LobbyGame   string `json:"lobbygame"`
 	LobbyLeader string `json:"lobbyleader"`
 
-	PersonName string `json:"personaname"`
-	AvatarFull string `json:"avatarfull"`
+	PersonaName string `json:"personaname"`
+	AvatarFull  string `json:"avatarfull"`
 }

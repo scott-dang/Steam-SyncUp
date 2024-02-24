@@ -14,17 +14,17 @@ import (
 func TestAuthUser(t *testing.T) {
 	authenticate = func(request events.APIGatewayProxyRequest, context context.Context) (model.User, error) {
 		return model.User{
-			SteamUUID:		"123",
-			AvatarFull:		"http://example.com/avatar.jpg",
-			PersonName:		"Mario",
+			SteamUUID:   "123",
+			AvatarFull:  "http://example.com/avatar.jpg",
+			PersonaName: "Mario",
 		}, nil
 	}
 
 	getUser = func(uuid string, context context.Context) (model.User, error) {
 		return model.User{
-			SteamUUID:		"456",
-			AvatarFull:		"http://example.com/avatar.jpg",
-			PersonName:		"Luigi",
+			SteamUUID:   "456",
+			AvatarFull:  "http://example.com/avatar.jpg",
+			PersonaName: "Luigi",
 		}, nil
 	}
 
@@ -40,17 +40,17 @@ func TestAuthUser(t *testing.T) {
 func TestDifferentUser(t *testing.T) {
 	authenticate = func(request events.APIGatewayProxyRequest, context context.Context) (model.User, error) {
 		return model.User{
-			SteamUUID:		"123",
-			AvatarFull:		"http://example.com/avatar.jpg",
-			PersonName:		"Mario",
+			SteamUUID:   "123",
+			AvatarFull:  "http://example.com/avatar.jpg",
+			PersonaName: "Mario",
 		}, nil
 	}
 
 	getUser = func(uuid string, context context.Context) (model.User, error) {
 		return model.User{
-			SteamUUID:		"456",
-			AvatarFull:		"http://example.com/avatar.jpg",
-			PersonName:		"Luigi",
+			SteamUUID:   "456",
+			AvatarFull:  "http://example.com/avatar.jpg",
+			PersonaName: "Luigi",
 		}, nil
 	}
 
@@ -65,4 +65,3 @@ func TestDifferentUser(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, true, strings.Contains(response.Body, "Luigi"))
 }
-

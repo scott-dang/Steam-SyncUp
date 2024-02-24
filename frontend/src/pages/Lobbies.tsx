@@ -28,33 +28,6 @@ export default function Lobbies() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!lobbySocket) {
-      lobbySocket = new WebSocket(`wss://uvchtgqo14.execute-api.us-west-2.amazonaws.com/production/?jwttoken=${getAuthToken()}`);
-    }
-
-    lobbySocket.onmessage = (ev: MessageEvent<any>) => {
-      try {
-        const data = JSON.parse(ev.data);
-
-        if (data.suid && data.message && data.date) {
-          addMessage(data.suid + ": " + data.message);
-        }
-
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    lobbySocket.onclose = (ev: CloseEvent) => {
-      console.log("Closing lobbySocket due to " + ev.reason);
-    }
-
-    lobbySocket.onopen = () => {
-      console.log("Opening lobbySocket");
-    }
-  })
-
   // Fetches current users games and lobbies, updates if user changes.
   useEffect(() => {
     const fetchGames = async () => {
@@ -81,6 +54,32 @@ export default function Lobbies() {
       setCurrentGame(gameResults[0]);
     }
   }, [gameResults]);
+
+  const handleConnectChat = (leader: string, appid: number) => {
+    lobbySocket = new WebSocket(`wss://uvchtgqo14.execute-api.us-west-2.amazonaws.com/production/?jwttoken=${getAuthToken()}&leader=${leader}&appid=${appid}`);
+
+    lobbySocket.onmessage = (ev: MessageEvent<any>) => {
+      try {
+        const data = JSON.parse(ev.data);
+
+        if (data.personaname && data.text && data.timestamp) {
+          // TODO: Integrate the timestamp onto the frontend
+          addMessage(data.personaname + ": " + data.text);
+        }
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    lobbySocket.onclose = (ev: CloseEvent) => {
+      console.log("Closing lobbySocket due to " + ev.reason);
+    }
+
+    lobbySocket.onopen = () => {
+      console.log("Opening lobbySocket");
+    }
+  }
 
   const fetchLobbies = async (gameId: number | null) => {
     if (gameId) {
@@ -122,13 +121,17 @@ export default function Lobbies() {
 
   // Handler to send messages using lobbySocket.
   const handleSendMessage = () => {
-    lobbySocket.send(JSON.stringify({
-      action: "sendmessage",
-      message: inputText,
-      suid: getUser().uuid,
-      personaname: getUser().personaname,
-    }))
-    addMessage("Me: " + inputText)
+    // TODO: Add visual confirmation of message failure / success
+    // (i.e., can fail if join lobby fails / web socket does not connect)
+    if (lobbySocket) {
+      lobbySocket.send(JSON.stringify({
+        action: "sendmessage",
+        text: inputText,
+        suid: getUser().uuid,
+        personaname: getUser().personaname,
+      }))
+      addMessage(`${getUser().personaname}: ${inputText}`)
+    }
     setInputText("")
   };
 
@@ -161,6 +164,8 @@ export default function Lobbies() {
   
         if (response.ok && currentGame) {
           await fetchLobbies(currentGame.appid)
+          
+          handleConnectChat(lobbyLeader, currentGame.appid)
         }
       } catch(err) {
         console.error(err)

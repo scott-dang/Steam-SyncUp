@@ -3,6 +3,7 @@ package lobbies
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -281,6 +282,7 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 	err = attributevalue.UnmarshalMap(response.Item, &lobbyObj)
 
 	if err != nil {
+		fmt.Println("Retrieved lobby object has an incorrect format: ", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 		}, nil
