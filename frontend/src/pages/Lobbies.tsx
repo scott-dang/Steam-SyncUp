@@ -209,7 +209,6 @@ export default function Lobbies() {
 
         {/* Chat area space containing the scrolling chat area, and input box. */}
         {currentGame && currentLobbyList.some(lobby => {
-          console.log(lobby, currentGame);
           return lobby.appid === currentGame.appid && lobby.lobbyusers.includes(getUser().uuid);
         }) && (
           <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
