@@ -149,7 +149,7 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 		userAcc := model.User{
 			SteamUUID:   id,
 			CreatedDate: time.Now().UTC().String(),
-			PersonName:  userDataBody.Response.Players[0].PersonaName,
+			PersonaName: userDataBody.Response.Players[0].PersonaName,
 			AvatarFull:  userDataBody.Response.Players[0].AvatarFull,
 		}
 
