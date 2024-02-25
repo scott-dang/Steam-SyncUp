@@ -24,6 +24,8 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 
 	connectionId := request.RequestContext.ConnectionID
 
+	fmt.Println("Received request to open connection: " + connectionId)
+
 	cfg, err := config.LoadDefaultConfig(context)
 	if err != nil {
 		fmt.Println("Error loading config")
@@ -40,6 +42,19 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 
 	appid, ok := request.QueryStringParameters["appid"]
 	if !ok {
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
+	}
+
+	resp, err := svc.GetItem(context, &dynamodb.GetItemInput{
+		TableName: aws.String("Connections"),
+		Key: map[string]types.AttributeValue{
+			"leader": &types.AttributeValueMemberS{Value: leader},
+			"appid":  &types.AttributeValueMemberN{Value: appid},
+		},
+	})
+
+	if len(resp.Item) == 0 {
+		fmt.Println("Error finding client specified lobby to connect to")
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
 	}
 

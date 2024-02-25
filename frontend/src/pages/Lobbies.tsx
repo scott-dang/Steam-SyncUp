@@ -2,20 +2,9 @@ import '../App.css';
 import Header from '../components/header';
 import CreateLobbyForm from '../components/createlobbyform'
 import React, {useEffect, useRef, useState } from 'react';
-import { Game, getGameImageUrl} from '../utilities';
+import { Game, getCurrentLobby, getGameImageUrl, Lobby, Message} from '../utilities';
 import { useAuth } from '../context/AuthContext';
-
-interface Lobby {
-  name: string,
-  leader: string,
-  maxusers: number,
-  lobbyname: string,
-  lobbyusers: string[],
-  appid: number,
-  messages: string[],
-}
-
-let lobbySocket: WebSocket;
+import useLobbySocket from '../hooks/useLobbySocket';
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -30,6 +19,15 @@ export default function Lobbies() {
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const { send, isOpen } = useLobbySocket(
+    getUser().jwttoken, currentGame?.appid || 0, getCurrentLobby(currentGame, currentLobbyList, getUser())?.leader || "",
+    {
+      addMessageToChat: (text: string) => {
+        addMessage(text)
+      },
+    }
+  );
 
   // Fetches current users games and lobbies
   useEffect(() => {
@@ -55,36 +53,16 @@ export default function Lobbies() {
   // Also fetches and sets the lobbies upon retrieval of game
   useEffect(() => {
     if (gameResults.length > 0) {
-      setCurrentGame(gameResults[0]);
-      fetchLobbies(gameResults[0].appid);
+      handleCurrentGame(gameResults[0]);
     }
   }, [gameResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleConnectChat = (leader: string, appid: number) => {
-    lobbySocket = new WebSocket(`wss://uvchtgqo14.execute-api.us-west-2.amazonaws.com/production/?jwttoken=${getAuthToken()}&leader=${leader}&appid=${appid}`);
+  useEffect(() => {
 
-    lobbySocket.onmessage = (ev: MessageEvent<any>) => {
-      try {
-        const data = JSON.parse(ev.data);
-
-        if (data.personaname && data.text && data.timestamp) {
-          // TODO: Integrate the timestamp onto the frontend
-          addMessage(data.personaname + ": " + data.text);
-        }
-
-      } catch (err) {
-        console.error(err);
-      }
+    if (currentGame) {
+      fetchLobbies(currentGame.appid)
     }
-
-    lobbySocket.onclose = (ev: CloseEvent) => {
-      console.log("Closing lobbySocket due to " + ev.reason);
-    }
-
-    lobbySocket.onopen = () => {
-      console.log("Opening lobbySocket");
-    }
-  }
+  }, [currentGame]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLobbies = async (gameId: number | null) => {
     if (gameId) {
@@ -121,14 +99,14 @@ export default function Lobbies() {
   const handleSendMessage = () => {
     // TODO: Add visual confirmation of message failure / success
     // (i.e., can fail if join lobby fails / web socket does not connect)
-    if (lobbySocket) {
-      lobbySocket.send(JSON.stringify({
-        action: "sendmessage",
-        text: inputText,
-        suid: getUser().uuid,
-        personaname: getUser().personaname,
-      }))
-      addMessage(`${getUser().personaname}: ${inputText}`)
+    if (isOpen) {
+      const message: Message = {
+        action:       "sendmessage",
+        text:         inputText,
+        suid:         getUser().uuid,
+        personaname:  getUser().personaname
+      }
+      send(message);
     }
     setInputText("")
   };
@@ -139,9 +117,8 @@ export default function Lobbies() {
   };
 
   // Handler to set the current game when a different game is clicked.
-  const handleCurrentGame = async (currentGame: Game) => {
-    setCurrentGame(currentGame)
-    await fetchLobbies(currentGame.appid)
+  const handleCurrentGame = async (newGame: Game) => {
+    setCurrentGame(newGame)
   };
 
   // Handler to join a lobby when a user chooses a game, and the lobby has a leader.
@@ -158,8 +135,6 @@ export default function Lobbies() {
   
         if (response.ok && currentGame) {
           await fetchLobbies(currentGame.appid)
-          
-          handleConnectChat(lobbyLeader, currentGame.appid)
         }
       } catch(err) {
         console.error(err)
@@ -208,9 +183,7 @@ export default function Lobbies() {
         />
 
         {/* Chat area space containing the scrolling chat area, and input box. */}
-        {currentGame && currentLobbyList.some(lobby => {
-          return lobby.appid === currentGame.appid && lobby.lobbyusers.includes(getUser().uuid);
-        }) && (
+        {currentGame && getCurrentLobby(currentGame, currentLobbyList, getUser()) && (
           <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
               <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
                 style={{
