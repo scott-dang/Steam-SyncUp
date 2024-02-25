@@ -5,13 +5,12 @@ import React, { FocusEvent, FormEvent, useState } from 'react';
 import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl, steamOpenIdEndpointUrl } from '../utilities';
 import { useAuth } from '../context/AuthContext';
 
-export default function Header() {
+export default function Header({currentGame, setCurrentGame}) {
 
   const { getUser, getAuthToken, isLoggedIn, setupUser, logout } = useAuth();
 
   const [searchInput, setSearchInput] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Game[]>([]);
-  const [selectedResult, setSelectedResult] = useState<Game | null>(null);
 
   // Used to determine the route we are on and conditionally load certain features (i.e., search bar)
   const location = useLocation();
@@ -84,7 +83,7 @@ export default function Header() {
     // Close the dropdown when clicking on a game from the dropdown
     setSearchResults([]);
 
-    setSelectedResult(game);
+    setCurrentGame(game);
   }
 
   return (
@@ -105,20 +104,20 @@ export default function Header() {
         <div className="flex flex-initial flex-row justify-items-start relative w-2/5">
           <div className="w-full">
 
-            {(location.pathname === "/lobbies" && selectedResult) ?
+            {(location.pathname === "/lobbies" && currentGame) ?
               // Replace searchbar input with selected game
               <div
                 className="flex flex-row items-center justify-center cursor-pointer w-full"
-                onClick={() => setSelectedResult(null)}
-                title={"Remove " + selectedResult.name}
+                onClick={() => setCurrentGame(null)}
+                title={"Remove " + currentGame.name}
               >
                 <img
                   className="h-12 w-12 cursor-pointer"
-                  src={getGameImageUrl(selectedResult.appid, selectedResult.img_icon_url)}
-                  alt={"Thumbnail of " + selectedResult.name}
+                  src={getGameImageUrl(currentGame.appid, currentGame.img_icon_url)}
+                  alt={"Thumbnail of " + currentGame.name}
                 />
                 <span className="text-3xl text-white text-nowrap truncate ml-5">
-                 {selectedResult.name}
+                 {currentGame.name}
                 </span>
               </div>
               :

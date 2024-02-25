@@ -165,7 +165,7 @@ export default function Lobbies() {
   return (
     <div className="h-screen overflow-hidden">
       {/* Header bar. */}
-      <Header />
+      <Header currentGame={currentGame} setCurrentGame={setCurrentGame}/>
 
       {/* Content space. */}
       <div className="flex flex-row h-screen text-white">
