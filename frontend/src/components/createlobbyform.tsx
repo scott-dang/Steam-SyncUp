@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-export default function CreateLobbyForm({ onClose, gameId }) {
+export default function CreateLobbyForm({ onClose, gameId, fetchLobbies }) {
     const {getAuthToken} = useAuth();
 
     const [currentLobbyName, setCurrentLobbyName] = useState<string>("");
@@ -12,22 +12,22 @@ export default function CreateLobbyForm({ onClose, gameId }) {
             const createLobbyServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/CreateLobby")
             createLobbyServiceEndpointURL.searchParams.set("game", gameId)
             createLobbyServiceEndpointURL.searchParams.set("name", currentLobbyName)
+            // TODO: Make maxusers a user defined value
             createLobbyServiceEndpointURL.searchParams.set("maxusers", "4")
 
             console.log("Creating lobby")
             setCurrentLobbyName("")
             
-            console.log("Fetching lobbies")
             const resp = await fetch(createLobbyServiceEndpointURL, {
             headers: {
                 "authorization": "Bearer " + getAuthToken(),
             }
             });
 
-            const data = await resp.json();
-
-            if (data) {
+            // Refresh lobbies list upon success
+            if (resp.ok) {
                 console.log("Lobby creation success!")
+                await fetchLobbies(gameId)
             }
             
         } catch(err) {

@@ -2,24 +2,16 @@ import '../App.css';
 import Header from '../components/header';
 import CreateLobbyForm from '../components/createlobbyform'
 import React, {useEffect, useRef, useState } from 'react';
-import { Game, getGameImageUrl} from '../utilities';
+import { Game, getCurrentLobby, getGameImageUrl, Lobby, Message} from '../utilities';
 import { useAuth } from '../context/AuthContext';
-
-interface Lobby {
-  name: string,
-  leader: string,
-  users: string[]
-  maxusers: number;
-}
-
-let lobbySocket: WebSocket;
+import useLobbySocket from '../hooks/useLobbySocket';
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
  * @returns The Lobbies page, displaying the GamesList, LobbiesList, and Chat.
  */
 export default function Lobbies() {
-  const {getUser, getAuthToken, setupUser} = useAuth();
+  const {getUser, getAuthToken} = useAuth();
   const [gameResults, setGameResults] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const [messages, setMessages] = useState<string[]>([]);
@@ -28,7 +20,19 @@ export default function Lobbies() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
-  // Fetches current users games and lobbies, updates if user changes.
+  const { send, isOpen } = useLobbySocket(
+    getUser().jwttoken, currentGame?.appid || 0, getCurrentLobby(currentGame, currentLobbyList, getUser())?.leader || "",
+    {
+      addMessageToChat: (text: string) => {
+        addMessage(text)
+      },
+      clearChat: () => {
+        setMessages([])
+      },
+    }
+  );
+
+  // Fetches current users games and lobbies
   useEffect(() => {
     const fetchGames = async () => {
       try {
@@ -39,7 +43,7 @@ export default function Lobbies() {
     };
     
     fetchGames();
-  }, [getAuthToken, getUser, setupUser, showCreateForm]);
+  });
 
   // Updates the chat messages when new messages arrive.
   useEffect(() => {
@@ -49,37 +53,19 @@ export default function Lobbies() {
   }, [messages]);
 
   // Sets the current game when game results are non-zero (first fetch).
+  // Also fetches and sets the lobbies upon retrieval of game
   useEffect(() => {
     if (gameResults.length > 0) {
-      setCurrentGame(gameResults[0]);
+      handleCurrentGame(gameResults[0]);
     }
-  }, [gameResults]);
+  }, [gameResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleConnectChat = (leader: string, appid: number) => {
-    lobbySocket = new WebSocket(`wss://uvchtgqo14.execute-api.us-west-2.amazonaws.com/production/?jwttoken=${getAuthToken()}&leader=${leader}&appid=${appid}`);
+  useEffect(() => {
 
-    lobbySocket.onmessage = (ev: MessageEvent<any>) => {
-      try {
-        const data = JSON.parse(ev.data);
-
-        if (data.personaname && data.text && data.timestamp) {
-          // TODO: Integrate the timestamp onto the frontend
-          addMessage(data.personaname + ": " + data.text);
-        }
-
-      } catch (err) {
-        console.error(err);
-      }
+    if (currentGame) {
+      fetchLobbies(currentGame.appid)
     }
-
-    lobbySocket.onclose = (ev: CloseEvent) => {
-      console.log("Closing lobbySocket due to " + ev.reason);
-    }
-
-    lobbySocket.onopen = () => {
-      console.log("Opening lobbySocket");
-    }
-  }
+  }, [currentGame]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLobbies = async (gameId: number | null) => {
     if (gameId) {
@@ -94,20 +80,23 @@ export default function Lobbies() {
         const data = await response.json();
 
         if (response.ok) {
-          setCurrentLobbyList(
-            data.map((lobbyData) => ({
-              name: lobbyData.lobbyname,
-              leader: lobbyData.leader,
-              users: lobbyData.lobbyusers,
-              maxusers: lobbyData.maxusers,
-            }))
-          );
+          setCurrentLobbyList(data)
         }
       } catch (err) {
         console.error(err);
       }
     }
   };
+
+  const handleOldMessages = (): string[] => {
+    if (isOpen && currentGame && currentLobbyList) {
+      const lobby = getCurrentLobby(currentGame, currentLobbyList, getUser());
+      if (lobby) {
+        return lobby.messages.map(message => `${message.personaname}: ${message.text}`);
+      }
+    }
+    return [];
+  }
  
   // Add new message to chat area.
   const addMessage = (message: string) => {
@@ -123,14 +112,14 @@ export default function Lobbies() {
   const handleSendMessage = () => {
     // TODO: Add visual confirmation of message failure / success
     // (i.e., can fail if join lobby fails / web socket does not connect)
-    if (lobbySocket) {
-      lobbySocket.send(JSON.stringify({
-        action: "sendmessage",
-        text: inputText,
-        suid: getUser().uuid,
-        personaname: getUser().personaname,
-      }))
-      addMessage(`${getUser().personaname}: ${inputText}`)
+    if (isOpen) {
+      const message: Message = {
+        action:       "sendmessage",
+        text:         inputText,
+        suid:         getUser().uuid,
+        personaname:  getUser().personaname
+      }
+      send(message);
     }
     setInputText("")
   };
@@ -138,16 +127,11 @@ export default function Lobbies() {
   // Handler to create a new lobby, then fetch and update lobbies.
   const handleCreateLobby = async () => {
     setShowCreateForm(!showCreateForm);
-
-    if (currentGame?.appid) {
-      await fetchLobbies(currentGame.appid)
-    }
   };
 
   // Handler to set the current game when a different game is clicked.
-  const handleCurrentGame = async (currentGame: Game) => {
-    setCurrentGame(currentGame)
-    await fetchLobbies(currentGame.appid)
+  const handleCurrentGame = async (newGame: Game) => {
+    setCurrentGame(newGame)
   };
 
   // Handler to join a lobby when a user chooses a game, and the lobby has a leader.
@@ -164,8 +148,6 @@ export default function Lobbies() {
   
         if (response.ok && currentGame) {
           await fetchLobbies(currentGame.appid)
-          
-          handleConnectChat(lobbyLeader, currentGame.appid)
         }
       } catch(err) {
         console.error(err)
@@ -196,17 +178,17 @@ export default function Lobbies() {
   return (
     <div className="h-screen overflow-hidden">
       {/* Header bar. */}
-      <Header />
+      <Header currentGame={currentGame} setCurrentGame={setCurrentGame}/>
 
       {/* Content space. */}
       <div className="flex flex-row h-screen text-white">
 
         {/* Games list component. */}
-        <GamesList gameResults={gameResults} handleCurrentGame={handleCurrentGame} />
+        <GamesList gameResults={gameResults} handleCurrentGame={handleCurrentGame} currentGame={currentGame}/>
 
         {/* Lobbies list component. */}
         <LobbiesList 
-          currentGame={currentGame} 
+          currentGame={currentGame}
           currentLobbyList={currentLobbyList} 
           handleCreateLobby={handleCreateLobby} 
           handleJoinLobby={handleJoinLobby}
@@ -214,29 +196,29 @@ export default function Lobbies() {
         />
 
         {/* Chat area space containing the scrolling chat area, and input box. */}
-        <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
-          {currentGame && (
-            <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
-              style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${currentGame.appid}/header.jpg)`,
-                backgroundSize: "fit",
-              }}
-              >
-              {currentGame && currentGame.name}
-            </div>
-          )}
+        {currentGame && getCurrentLobby(currentGame, currentLobbyList, getUser()) && (
+          <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
+              <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${currentGame.appid}/header.jpg)`,
+                  backgroundSize: "fit",
+                }}
+                >
+                {currentGame && currentGame.name}
+              </div>
 
-          <ChatArea messages={messages} chatRef={chatRef} />
+            <ChatArea messages={[...messages, ...handleOldMessages().reverse()]} chatRef={chatRef} />
 
-          <InputBox 
-            inputText={inputText}
-            handleInputChange={handleInputChange}
-            handleSendMessage={handleSendMessage} />
-        </div>
+            <InputBox
+              inputText={inputText}
+              handleInputChange={handleInputChange}
+              handleSendMessage={handleSendMessage} />
+          </div>
+        )}
       </div>
 
        {/* Handles Create Lobby Form. */}
-       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} gameId={currentGame?.appid} />}
+       {showCreateForm && <CreateLobbyForm onClose={handleCreateLobby} gameId={currentGame?.appid} fetchLobbies={fetchLobbies} />}
     </div>
   );
 }
@@ -247,9 +229,14 @@ export default function Lobbies() {
  * @param handleCurrentGame A handler callback function to update the current game.
  * @returns A visual list of games owned by the user.
  */
-const GamesList = ({ gameResults, handleCurrentGame }) => {
+const GamesList = ({ gameResults, currentGame, handleCurrentGame }) => {
 
-  const [selectedGameIndex, setSelectedGameIndex] = useState(null);
+  const isCurrentGame = (appid: number) => {
+    if (currentGame && appid && currentGame.appid) {
+      return appid === currentGame.appid;
+    }
+    return false;
+  }
 
   return (
     <div className="bg-grayprimary w-1/4 text-xl font-bold overflow-y-auto border border-graysecondary rounded-3xl"> 
@@ -258,7 +245,7 @@ const GamesList = ({ gameResults, handleCurrentGame }) => {
       </h2>
       <ul className='list-none py-4'>
         {gameResults && 
-          gameResults.map((game, index) => (
+          gameResults.map((game: Game) => (
           <li 
             key={game.appid} 
             className='font-normal rounded-xl mb-5 mx-2' 
@@ -267,11 +254,10 @@ const GamesList = ({ gameResults, handleCurrentGame }) => {
               backgroundSize: "cover",
               backdropFilter: "blur(5px)",
               transition: "transform 0.1s ease, box-shadow 0.3s ease",
-              boxShadow: index === selectedGameIndex ? "0 0 1px 1px white inset" : "none",
+              boxShadow: isCurrentGame(game.appid) ? "0 0 1px 1px white inset" : "none",
             }}
             onClick={() => {
               handleCurrentGame(game);
-              setSelectedGameIndex(index);
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "scale(1.05)";
@@ -279,7 +265,7 @@ const GamesList = ({ gameResults, handleCurrentGame }) => {
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = index === selectedGameIndex ? "0 0 1px 1px white inset" : "none";
+              e.currentTarget.style.boxShadow = isCurrentGame(game.appid) ? "0 0 1px 1px white inset" : "none";
             }}>
             <div className='flex flex-row items-center p-2'>
               <img 
@@ -311,8 +297,9 @@ const LobbiesList = ({
     currentLobbyList, 
     handleCreateLobby,
     handleJoinLobby,
-    handleLeaveLobby
+    handleLeaveLobby,
   }) => {
+  const {getUser} = useAuth();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -351,24 +338,26 @@ const LobbiesList = ({
         </div>
         ) : (
         <ul className='py-2'>
-          {currentLobbyList.map(lobby => (
-            <li className='font-normal text-sm my-5'>
+          {currentLobbyList.map((lobby: Lobby, index: number) => (
+            <li className='font-normal text-sm my-5' key={index}>
               <div className="flex justify-between mx-2 text-white text-xs items-center">
-                <p>{lobby.name}</p>
+                <p>{lobby.lobbyname}</p>
                 <div className='flex flex-row items-center'>
-                  <button 
-                    className='bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2'
-                    onClick={() => {handleJoinLobby(currentGame.appid, lobby.leader)}}
-                  >
-                    Join
-                  </button>
+                  {!lobby.lobbyusers.includes(getUser().uuid) &&
+                    <button 
+                      className='bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2'
+                      onClick={() => {handleJoinLobby(currentGame.appid, lobby.leader)}}
+                    >
+                      Join
+                    </button>
+                  }
                   <button 
                     className='bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2'
                     onClick={() => {handleLeaveLobby(currentGame.appid, lobby.leader)}}
                   >
                     Leave
                   </button>
-                  <p className="ml-2">{lobby.users.length} / {lobby.maxusers}</p>
+                  <p className="ml-2">{lobby.lobbyusers.length} / {lobby.maxusers}</p>
                 </div>
               </div>
               <hr className="h-px my-4 bg-white border-0 dark:bg-gray-500"/>
@@ -402,7 +391,7 @@ const ChatArea = ({ messages, chatRef }) => (
  * @param handleSendMessage A handler to send the inputText.
  * @returns An area where chat messages can be input.
  */
-const InputBox = ({ 
+const InputBox = ({
   inputText, 
   handleInputChange, 
   handleSendMessage

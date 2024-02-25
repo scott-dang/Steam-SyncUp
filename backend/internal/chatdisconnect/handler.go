@@ -23,6 +23,8 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError}, err
 	}
 
+	fmt.Println("Received request to close connection: " + connectionId)
+
 	svc := dynamodb.NewFromConfig(cfg)
 
 	item, err := svc.GetItem(context, &dynamodb.GetItemInput{

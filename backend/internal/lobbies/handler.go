@@ -189,7 +189,7 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":a": &types.AttributeValueMemberN{Value: game},
 		},
-		ProjectionExpression: aws.String("leader, lobbyname, lobbyusers, maxusers"),
+		ProjectionExpression: aws.String("appid, leader, lobbyname, lobbyusers, maxusers, messages"),
 	})
 
 	if err != nil {

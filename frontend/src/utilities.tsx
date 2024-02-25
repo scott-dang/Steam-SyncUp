@@ -123,6 +123,43 @@ export const steamOpenIdEndpointUrl = (): URL => {
 	return url;
 };
 
+/**
+ * Searches through all the lobbies of the current game and determines
+ * whether or not there exists a lobby that the user is in already
+ * @returns Lobby iff there exists a lobby the user is in, else undefined
+ */
+export const getCurrentLobby = (currentGame: Game | null, currentLobbyList: Lobby[], currentUser: User): Lobby | undefined => {
+  if (currentGame) {
+    const result = currentLobbyList.find(lobby => {
+
+      const sameGame = lobby.appid === currentGame.appid;
+      const hasUser = lobby.lobbyusers.includes(currentUser.uuid);
+
+      return sameGame && hasUser;
+    });
+
+    return result;
+  }
+  return undefined;
+}
+
+export interface Lobby {
+  name: string,
+  leader: string,
+  maxusers: number,
+  lobbyname: string,
+  lobbyusers: string[],
+  appid: number,
+  messages: string[],
+}
+
+export interface Message {
+  action:       string,
+  text:         string,
+  suid:         string,
+  personaname:  string,
+}
+
 export const authServiceEndpointURL: URL = new URL(
 	"https://og8ukicoij.execute-api.us-west-2.amazonaws.com/default/auth"
 );
