@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 // Custom hook that manages a user's WebSocket throughout their entire session
 const useWebSocket = (url: string, {
   onMessage,
+  onClose,
 }) => {
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -40,6 +41,7 @@ const useWebSocket = (url: string, {
         console.log("WebSocket closed: abruptly");
       }
       setIsWebSocketOpen(false);
+      onClose();
     }
 
     webSocket.onopen = () => {

@@ -23,12 +23,13 @@ const lobbyUrl = (jwttoken: string, appid: number, leader: string) => {
 
 type UseLobbySocketOptions = {
   addMessageToChat: (text: string) => void,
+  clearChat: () => void,
 }
 
 // Hook that wraps useWebSocket hook for our use case
 const useLobbySocket = (jwttoken: string, appid: number, leader: string, options: UseLobbySocketOptions) => {
 
-  const { addMessageToChat } = options;
+  const { addMessageToChat, clearChat } = options;
 
   const isValid = useMemo(() => isValidLobbyURL(jwttoken, appid, leader), [jwttoken, appid, leader])
 
@@ -43,7 +44,10 @@ const useLobbySocket = (jwttoken: string, appid: number, leader: string, options
 
   const { webSocketSend, isWebSocketOpen } = useWebSocket(
     (isValid ? lobbyUrl(jwttoken, appid, leader) : ""),
-    {onMessage}
+    {
+      onMessage, 
+      onClose: clearChat,
+    }
   );
 
   const send = (message: Message) => {

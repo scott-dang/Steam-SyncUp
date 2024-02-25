@@ -26,6 +26,9 @@ export default function Lobbies() {
       addMessageToChat: (text: string) => {
         addMessage(text)
       },
+      clearChat: () => {
+        setMessages([])
+      },
     }
   );
 
@@ -84,6 +87,16 @@ export default function Lobbies() {
       }
     }
   };
+
+  const handleOldMessages = (): string[] => {
+    if (isOpen && currentGame && currentLobbyList) {
+      const lobby = getCurrentLobby(currentGame, currentLobbyList, getUser());
+      if (lobby) {
+        return lobby.messages.map(message => `${message.personaname}: ${message.text}`);
+      }
+    }
+    return [];
+  }
  
   // Add new message to chat area.
   const addMessage = (message: string) => {
@@ -194,7 +207,7 @@ export default function Lobbies() {
                 {currentGame && currentGame.name}
               </div>
 
-            <ChatArea messages={messages} chatRef={chatRef} />
+            <ChatArea messages={[...messages, ...handleOldMessages().reverse()]} chatRef={chatRef} />
 
             <InputBox
               inputText={inputText}
