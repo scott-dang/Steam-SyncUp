@@ -35,3 +35,18 @@ type UsersServiceProfileInfoResponseBody struct {
 	AvatarFull  string `json:"avatarfull"`
 	PersonaName string `json:"personaname"`
 }
+
+type SendMessageServiceRequestBody struct {
+	Text        string `json:"text"`
+	SUID        string `json:"suid"`
+	Personaname string `json:"personaname"`
+}
+
+type SendMessageServiceConnectionsInput struct {
+	Key       ConnectionsKey `json:"key"`
+	TableName string         `json:"tableName"`
+}
+
+type SendMessageServiceConnectionsKey struct {
+	ConnectionID string `json:"connectionId"`
+}
