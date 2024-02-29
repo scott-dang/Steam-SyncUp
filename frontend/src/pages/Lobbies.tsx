@@ -211,9 +211,10 @@ export default function Lobbies() {
               </div>
 
               <div className='flex flex-row mt-2 ml-5 mb-5'>
-                 {Object.keys(currentLobby?.lobbyusers).map((user, index) => (
-                  <a href={`https://steamcommunity.com/profiles/${user.suid}`} target="_blank" rel="noreferrer">
-                    <img src={user === getUser().uuid ? getUser().avatarfull : (user.avatarfull || defaultAvatarFull)} className="hover:scale-125 duration-300 max-w-full max-h-12 rounded-3xl mr-3" alt="User profile"/>
+                {Object.values(currentLobby?.lobbyusers).map((user, avatarfull, index) => (
+                  <a href={`https://steamcommunity.com/profiles/${user}`} target="_blank" rel="noreferrer">
+                    <img src={user.uuid === getUser().uuid ? getUser().avatarfull : (user.avatarfull || defaultAvatarFull)}
+                    className="hover:scale-125 duration-300 max-w-full max-h-12 rounded-3xl mr-3" alt="User profile"/>
                   </a>
                 ))}
               </div>
