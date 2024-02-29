@@ -77,7 +77,7 @@ function Auth() {
 
 	return (
 		<div className="bg-[#1A1A1A] h-screen flex flex-col">
-			<Header />
+			<Header currentGame={null} setCurrentGame={() => {}}/>
 			<div className="flex-grow flex justify-center items-center">
 				<MoonLoader
 					color="#9e9fa2"

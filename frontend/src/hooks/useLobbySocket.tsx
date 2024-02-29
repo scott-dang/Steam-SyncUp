@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Message } from "../utilities";
+import { ReceivedMessage, SendMessage } from "../utilities";
 import useWebSocket from "./useWebSocket";
 
 // Any falsy value should be considered invalid (appid = 0, empty string, etc.)
@@ -22,7 +22,7 @@ const lobbyUrl = (jwttoken: string, appid: number, leader: string) => {
 }
 
 type UseLobbySocketOptions = {
-  addMessageToChat: (text: string) => void,
+  addMessageToChat: (message: ReceivedMessage) => void,
   clearChat: () => void,
 }
 
@@ -35,8 +35,8 @@ const useLobbySocket = (jwttoken: string, appid: number, leader: string, options
 
   const onMessage = (ev: MessageEvent) => {
     try {
-      const receivedMessage: Message = JSON.parse(ev.data);
-      addMessageToChat(`${receivedMessage.personaname}: ${receivedMessage.text}`)
+      const receivedMessage: ReceivedMessage = JSON.parse(ev.data);
+      addMessageToChat(receivedMessage);
     } catch (err) {
       console.error("Error receiving message");
     }
@@ -50,9 +50,16 @@ const useLobbySocket = (jwttoken: string, appid: number, leader: string, options
     }
   );
 
-  const send = (message: Message) => {
+  const send = (message: SendMessage) => {
     webSocketSend(JSON.stringify(message));
-    addMessageToChat(`${message.personaname}: ${message.text}`)
+
+    const receivedMessage: ReceivedMessage = {
+      // When we send a message, we can create our own client sided timestamp
+      // Our message does not get sent to ourselves again over the WebSocket
+      timestamp: Date.now(),
+      ...message,
+    }
+    addMessageToChat(receivedMessage)
   }
 
   return { 
