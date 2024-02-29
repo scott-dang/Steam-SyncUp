@@ -1,8 +1,8 @@
 import '../App.css';
 import Header from '../components/header';
 import CreateLobbyForm from '../components/createlobbyform'
-import React, {useEffect, useRef, useState } from 'react';
-import { Game, getCurrentLobby, getGameImageUrl, Lobby, Message} from '../utilities';
+import React, {useEffect, useMemo, useRef, useState } from 'react';
+import { defaultAvatarFull, Game, getCurrentLobby, getDateString, getGameImageUrl, Lobby, ReceivedMessage, SendMessage} from '../utilities';
 import { useAuth } from '../context/AuthContext';
 import useLobbySocket from '../hooks/useLobbySocket';
 
@@ -14,17 +14,21 @@ export default function Lobbies() {
   const {getUser, getAuthToken} = useAuth();
   const [gameResults, setGameResults] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ReceivedMessage[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
+  const currentLobby = useMemo<Lobby | null>(() => {
+    return getCurrentLobby(currentGame, currentLobbyList, getUser()) || null;
+  }, [currentGame, currentLobbyList, getUser]);
+
   const { send, isOpen } = useLobbySocket(
-    getUser().jwttoken, currentGame?.appid || 0, getCurrentLobby(currentGame, currentLobbyList, getUser())?.leader || "",
+    getUser().jwttoken, currentGame?.appid || 0, currentLobby?.leader || "",
     {
-      addMessageToChat: (text: string) => {
-        addMessage(text)
+      addMessageToChat: (message: ReceivedMessage) => {
+        addMessage(message)
       },
       clearChat: () => {
         setMessages([])
@@ -89,18 +93,15 @@ export default function Lobbies() {
   };
 
   const handleOldMessages = (): string[] => {
-    if (isOpen && currentGame && currentLobbyList) {
-      const lobby = getCurrentLobby(currentGame, currentLobbyList, getUser());
-      if (lobby) {
-        return lobby.messages.map(message => `${message.personaname}: ${message.text}`);
-      }
+    if (isOpen && currentGame && currentLobbyList && currentLobby) {
+      return currentLobby.messages;
     }
     return [];
   }
  
   // Add new message to chat area.
-  const addMessage = (message: string) => {
-    setMessages(prevMessages => [message, ...prevMessages]);
+  const addMessage = (message: ReceivedMessage) => {
+    setMessages(prevMessages => [...prevMessages, message]);
   };
 
   // Handler for the text box input.
@@ -113,7 +114,7 @@ export default function Lobbies() {
     // TODO: Add visual confirmation of message failure / success
     // (i.e., can fail if join lobby fails / web socket does not connect)
     if (isOpen) {
-      const message: Message = {
+      const message: SendMessage = {
         action:       "sendmessage",
         text:         inputText,
         suid:         getUser().uuid,
@@ -196,7 +197,7 @@ export default function Lobbies() {
         />
 
         {/* Chat area space containing the scrolling chat area, and input box. */}
-        {currentGame && getCurrentLobby(currentGame, currentLobbyList, getUser()) && (
+        {currentGame && currentLobby && (
           <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
               <div className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
                 style={{
@@ -207,7 +208,7 @@ export default function Lobbies() {
                 {currentGame && currentGame.name}
               </div>
 
-            <ChatArea messages={[...messages, ...handleOldMessages().reverse()]} chatRef={chatRef} />
+            <ChatArea messages={[...handleOldMessages(), ...messages].reverse()} chatRef={chatRef} />
 
             <InputBox
               inputText={inputText}
@@ -343,7 +344,7 @@ const LobbiesList = ({
               <div className="flex justify-between mx-2 text-white text-xs items-center">
                 <p>{lobby.lobbyname}</p>
                 <div className='flex flex-row items-center'>
-                  {!lobby.lobbyusers.includes(getUser().uuid) &&
+                  {!(getUser().uuid in lobby.lobbyusers) &&
                     <button 
                       className='bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2'
                       onClick={() => {handleJoinLobby(currentGame.appid, lobby.leader)}}
@@ -357,7 +358,7 @@ const LobbiesList = ({
                   >
                     Leave
                   </button>
-                  <p className="ml-2">{lobby.lobbyusers.length} / {lobby.maxusers}</p>
+                  <p className="ml-2">{`${Object.keys(lobby.lobbyusers).length} / ${lobby.maxusers}`}</p>
                 </div>
               </div>
               <hr className="h-px my-4 bg-white border-0 dark:bg-gray-500"/>
@@ -376,13 +377,34 @@ const LobbiesList = ({
  * @param chatRef A chat persistence reference.
  * @returns An area where chat messages are displayed.
  */
-const ChatArea = ({ messages, chatRef }) => (
-  <div ref={chatRef} className="flex flex-col-reverse p-4 overflow-y-auto h-screen" style={{ maxHeight: 'calc(90vh - 200px)' }}>
-    {messages.map((message, index) => (
-      <div key={index} className="p-3 my-1 bg-graysecondary rounded-3xl">{message}</div>
+const ChatArea = ({ messages, chatRef }) => {
+  const {getUser} = useAuth();
+
+  return (<div ref={chatRef} className="flex flex-col-reverse p-4 overflow-y-auto h-screen" style={{ maxHeight: 'calc(90vh - 200px)' }}>
+    {messages.map((message: ReceivedMessage, index: number) => (
+      <div key={index} className="flex-col my-2">
+        <div className="flex flex-row items-baseline px-3 py-1">
+          <div className="">
+            <a href={`https://steamcommunity.com/profiles/${message.suid}`} target="_blank" rel="noreferrer">
+              <img src={message.suid === getUser().uuid ? getUser().avatarfull : (message.avatarfull || defaultAvatarFull)} className="max-w-full max-h-6" alt="User profile"/>
+            </a>
+          </div>
+          <div className="ml-1">
+            <a href={`https://steamcommunity.com/profiles/${message.suid}`} target="_blank" rel="noreferrer">
+              {message.personaname}
+            </a>
+          </div>
+          <div className="ml-3 text-sm">
+            {getDateString(new Date(+message.timestamp))}
+          </div>
+        </div>
+        <div className="bg-graysecondary px-3 py-2 rounded-3xl text-sm">
+          {message.text}
+        </div>
+      </div>
     ))}
-  </div>
-);
+  </div>);
+}
 
 /**
  * Function component for an input box.

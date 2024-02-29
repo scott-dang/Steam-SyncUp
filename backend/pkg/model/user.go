@@ -10,3 +10,9 @@ type User struct {
 	PersonaName string `json:"personaname"`
 	AvatarFull  string `json:"avatarfull"`
 }
+
+type PublicUser struct {
+	SteamUUID   string
+	PersonaName string `json:"personaname"`
+	AvatarFull  string `json:"avatarfull"`
+}

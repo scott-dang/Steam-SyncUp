@@ -1,12 +1,12 @@
 package model
 
 type Lobby struct {
-	Leader     string    `json:"leader"`
-	Appid      int       `json:"appid"`
-	LobbyName  string    `json:"lobbyname"`
-	LobbyUsers []string  `json:"lobbyusers"`
-	MaxUsers   int       `json:"maxusers"`
-	Messages   []Message `json:"messages"`
+	Leader     string                `json:"leader"`
+	Appid      int                   `json:"appid"`
+	LobbyName  string                `json:"lobbyname"`
+	LobbyUsers map[string]PublicUser `json:"lobbyusers"`
+	MaxUsers   int                   `json:"maxusers"`
+	Messages   []Message             `json:"messages"`
 }
 
 type Message struct {
@@ -14,4 +14,5 @@ type Message struct {
 	Suid        string `json:"suid"`
 	Text        string `json:"text"`
 	Timestamp   string `json:"timestamp"`
+	AvatarFull  string `json:"avatarfull"`
 }
