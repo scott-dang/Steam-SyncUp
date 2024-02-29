@@ -28,6 +28,8 @@ const defaultUser: User = {
 	games: [],
   avatarfull: "",
   personaname: "",
+  lobbygame: "",
+  lobbyleader: "",
 };
 
 const loadSavedUser = (): User => {

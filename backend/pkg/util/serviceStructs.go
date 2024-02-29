@@ -34,4 +34,6 @@ type SteamGetPlayerSummariesBody struct {
 type UsersServiceProfileInfoResponseBody struct {
 	AvatarFull  string `json:"avatarfull"`
 	PersonaName string `json:"personaname"`
+	LobbyGame   string `json:"lobbygame"`
+	LobbyLeader string `json:"lobbyleader"`
 }
