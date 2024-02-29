@@ -70,7 +70,7 @@ function Auth() {
 			navigate("/");
 			alert("Login failed!");
 			logout();
-		}, 6000);
+		}, 10000);
 
 		return () => clearTimeout(authTimeout);
 	});
