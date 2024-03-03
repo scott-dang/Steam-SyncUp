@@ -10,10 +10,10 @@ import useLobbySocket from '../hooks/useLobbySocket';
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
  * @returns The Lobbies page, displaying the GamesList, LobbiesList, and Chat.
  */
-export default function Lobbies() {
+export default function Lobbies({ game }) {
   const {getUser, getAuthToken} = useAuth();
   const [gameResults, setGameResults] = useState<Game[]>([]);
-  const [currentGame, setCurrentGame] = useState<Game | null>(null);
+  const [currentGame, setCurrentGame] = useState<Game | null>(game);
   const [messages, setMessages] = useState<ReceivedMessage[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
@@ -59,7 +59,7 @@ export default function Lobbies() {
   // Sets the current game when game results are non-zero (first fetch).
   // Also fetches and sets the lobbies upon retrieval of game
   useEffect(() => {
-    if (gameResults.length > 0) {
+    if (gameResults.length > 0 && !currentGame) {
       handleCurrentGame(gameResults[0]);
     }
   }, [gameResults]); // eslint-disable-line react-hooks/exhaustive-deps

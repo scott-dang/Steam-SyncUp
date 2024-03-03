@@ -164,9 +164,9 @@ export default function Header({currentGame, setCurrentGame}) {
       }
 
       {isLoggedIn() &&
-        // Settings button
-        <Link className="text-white text-2xl ml-10" to="/settings">
-          Settings
+        // Info button
+        <Link className="text-white text-2xl ml-10" to="/information">
+          Information
         </Link>
       }
 
