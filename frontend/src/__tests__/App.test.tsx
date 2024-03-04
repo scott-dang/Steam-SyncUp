@@ -3,14 +3,14 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Landing from "../pages/Landing";
 import Lobbies from "../pages/Lobbies";
-import Settings from "../pages/Settings";
+import Information from "../pages/Information";
 
 const routes = (
 	<MemoryRouter initialEntries={["/"]}>
 		<Routes>
 			<Route path="/" element={<Landing />} />
 			<Route path="lobbies" element={<Lobbies />} />
-			<Route path="settings" element={<Settings />} />
+			<Route path="Information" element={<Information />} />
 		</Routes>
 	</MemoryRouter>
 );
@@ -29,9 +29,9 @@ test('renders no Lobbies component for "lobbies" route with no auth', () => {
 	expect(screen.queryByText(/lobbies/i)).toBeFalsy();
 });
 
-test('renders no Settings component for "/settings" route with no auth', () => {
+test('renders no Information component for "/Information" route with no auth', () => {
 	render(routes);
 
-	// Check if the Settings component isn't rendered
-	expect(screen.queryByText(/settings/i)).toBeFalsy();
+	// Check if the Information component isn't rendered
+	expect(screen.queryByText(/Information/i)).toBeFalsy();
 });
