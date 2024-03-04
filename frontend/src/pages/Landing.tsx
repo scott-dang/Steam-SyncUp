@@ -1,15 +1,48 @@
-import "../App.css";
 import React from "react";
-import Header from "../components/header";
+import "../App.css";
 import LandingBoxes from "../components/LandingBoxes";
+import Carousel from "../components/carousel";
+import Header from "../components/header";
+import { useAuth } from "../context/AuthContext";
 
 function Landing() {
-	return (
+	const { isLoggedIn } = useAuth();
+
+	return isLoggedIn() ? (
 		<div className="bg-[#1A1A1A] h-screen overflow-hidden">
 			<Header></Header>
 			<div className="h-full overflow-scroll">
 				<LandingBoxes></LandingBoxes>
 			</div>
+		</div>
+	) : (
+		<div className="bg-[#1A1A1A] h-screen overflow-hidden">
+			<Header></Header>
+			<Carousel
+				cards={[
+					{
+						image: "https://i.imgur.com/Jm1zfLh.png",
+						caption: "Welcome to Steam SyncUp",
+					},
+					{
+						image: "https://i.imgur.com/KIFTCMx.png",
+						caption: "Sync your Steam Data",
+					},
+					{
+						image: "https://i.imgur.com/0RIPCor.png",
+						caption: "Create Messaging Lobbies",
+					},
+					{
+						image: "https://i.imgur.com/qjhRooE.png",
+						caption: "Connect with Fellow Gamers",
+					},
+
+					{
+						image: "https://i.imgur.com/eF9Tu8d.png",
+						caption: "Experience Your Games Together",
+					},
+				]}
+			/>
 		</div>
 	);
 }
