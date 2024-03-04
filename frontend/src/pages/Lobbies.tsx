@@ -4,6 +4,7 @@ import CreateLobbyForm from "../components/createlobbyform";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   defaultAvatarFull,
+  fetchUsersServiceAPI,
   Game,
   getCurrentLobby,
   getDateString,
@@ -28,6 +29,8 @@ export default function Lobbies() {
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const user = getUser();
 
   const currentLobby = useMemo<Lobby | null>(() => {
     return getCurrentLobby(currentGame, currentLobbyList, getUser()) || null;
@@ -140,6 +143,14 @@ export default function Lobbies() {
     setShowCreateForm(!showCreateForm);
   };
 
+  const handleMyLobby = async () => {
+    const resp = await fetchUsersServiceAPI(user.jwttoken);
+
+    if (resp?.lobbygame) {
+      setCurrentGame(user.games.find(game => game.appid === Number(resp.lobbygame)) || currentGame || null)
+    }
+  }
+
   // Handler to set the current game when a different game is clicked.
   const handleCurrentGame = async (newGame: Game) => {
     setCurrentGame(newGame);
@@ -211,6 +222,7 @@ export default function Lobbies() {
           currentGame={currentGame}
           currentLobbyList={currentLobbyList}
           handleCreateLobby={handleCreateLobby}
+          handleMyLobby={handleMyLobby}
           handleJoinLobby={handleJoinLobby}
           handleLeaveLobby={handleLeaveLobby}
         />
@@ -253,7 +265,7 @@ export default function Lobbies() {
 
               <div>{currentLobby.lobbyname}</div>
 
-              {currentLobby.leader == getUser().personaname ? (
+              {currentLobby.leader === getUser().personaname ? (
                 <button>
                   Lobby Settings
                 </button>
@@ -366,6 +378,7 @@ const LobbiesList = ({
   currentGame,
   currentLobbyList,
   handleCreateLobby,
+  handleMyLobby,
   handleJoinLobby,
   handleLeaveLobby,
 }) => {
@@ -392,7 +405,9 @@ const LobbiesList = ({
         >
           Create Lobby
         </button>
-        <button className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full">
+        <button className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full"
+        onClick={handleMyLobby}
+        >
           My Lobby
         </button>
       </div>
