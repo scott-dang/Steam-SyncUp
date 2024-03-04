@@ -87,15 +87,23 @@ export default function Header({currentGame, setCurrentGame}) {
   }
 
   return (
-    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-grayprimary">
-      <Link className="text-white text-3xl cursor-pointer" to="/">
-        Steam SyncUp
+    <div className="flex flex-row py-8 px-10 justify-between items-center bg-grayprimary">
+      <Link className="text-white text-4xl cursor-pointer hover:scale-110 duration-150" to="/">
+        <b>
+          <em>
+            Steam SyncUp
+          </em>
+        </b>
       </Link>
 
       {(location.pathname !== "/lobbies" && isLoggedIn()) &&
         // Lobbies button
-        <Link className="text-white text-2xl cursor-pointer" to="/lobbies">
-          Lobbies
+        <Link className="text-white text-2xl cursor-pointer hover:scale-110 duration-150" to="/lobbies">
+          <b>
+            <em>
+              Lobbies
+            </em>
+          </b>
         </Link>
       }
 
@@ -107,17 +115,21 @@ export default function Header({currentGame, setCurrentGame}) {
             {(location.pathname === "/lobbies" && currentGame) ?
               // Replace searchbar input with selected game
               <div
-                className="flex flex-row items-center justify-center cursor-pointer w-full"
+                className="flex flex-row items-center justify-center cursor-pointer w-full hover:scale-110 duration-150"
                 onClick={() => setCurrentGame(null)}
                 title={"Remove " + currentGame.name}
               >
                 <img
-                  className="h-12 w-12 cursor-pointer"
+                  className="h-12 w-12 cursor-pointer rounded-md"
                   src={getGameImageUrl(currentGame.appid, currentGame.img_icon_url)}
                   alt={"Thumbnail of " + currentGame.name}
                 />
                 <span className="text-3xl text-white text-nowrap truncate ml-5">
-                 {currentGame.name}
+                 <b>
+                  <em>
+                  {currentGame.name}
+                  </em>
+                 </b>
                 </span>
               </div>
               :
@@ -165,8 +177,12 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {isLoggedIn() &&
         // Settings button
-        <Link className="text-white text-2xl ml-10" to="/settings">
-          Settings
+        <Link className="text-white text-2xl ml-10  hover:scale-110 duration-150" to="/settings">
+          <b>
+            <em>
+              Settings
+            </em>
+          </b>
         </Link>
       }
 
@@ -179,8 +195,12 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {isLoggedIn() &&
         // Signout button
-        <Link onClick={logout} className="text-white text-2xl cursor-pointer" to="/">
-          Sign out
+        <Link onClick={logout} className="text-white text-2xl cursor-pointer hover:scale-110 duration-150" to="/">
+          <b>
+            <em>
+              Sign Out
+            </em>
+          </b>
         </Link>
       }
     </div>
