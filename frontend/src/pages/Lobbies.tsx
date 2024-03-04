@@ -192,8 +192,6 @@ export default function Lobbies() {
     }
   };
 
-  console.log(currentLobby?.lobbyusers);
-
   return (
     <div className="h-screen overflow-hidden">
       {/* Header bar. */}
@@ -230,25 +228,39 @@ export default function Lobbies() {
               {currentGame && currentGame.name}
             </div>
 
-            <div className="flex flex-row mt-2 ml-5 mb-5">
-              {Object.values(currentLobby?.lobbyusers).map(
-                (user, avatarfull, index) => (
-                  <a
-                    href={`https://steamcommunity.com/profiles/${user}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <img
-                      src={
-                        user.uuid === getUser().uuid
-                          ? getUser().avatarfull
-                          : user.avatarfull || defaultAvatarFull
-                      }
-                      className="hover:scale-125 duration-300 max-w-full max-h-12 rounded-3xl mr-3"
-                      alt="User profile"
-                    />
-                  </a>
-                ),
+            <div className="flex flex-row my-2 mx-5 px-3 justify-between items-center">
+              <div className="flex flex-row ">
+                {Object.values(currentLobby?.lobbyusers).map(
+                  (user, avatarfull, index) => (
+                    <a
+                      href={`https://steamcommunity.com/profiles/${user}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img
+                        src={
+                          user.uuid === getUser().uuid
+                            ? getUser().avatarfull
+                            : user.avatarfull || defaultAvatarFull
+                        }
+                        className="hover:scale-125 duration-300 max-w-full max-h-12 rounded-3xl"
+                        alt="User profile"
+                      />
+                    </a>
+                  ),
+                )}
+              </div>
+
+              <div>{currentLobby.lobbyname}</div>
+
+              {currentLobby.leader == getUser().personaname ? (
+                <button>
+                  Lobby Settings
+                </button>
+              ) : (
+                <button>
+                  Settings
+                </button>
               )}
             </div>
 
@@ -456,7 +468,7 @@ const ChatArea = ({ messages, chatRef }) => {
     <div
       ref={chatRef}
       className="flex flex-col-reverse p-4 overflow-y-auto h-screen"
-      style={{ maxHeight: "calc(90vh - 200px)" }}
+      style={{ maxHeight: "calc(85vh - 200px)" }}
     >
       {messages.map((message: ReceivedMessage, index: number) => (
         <div key={index} className="flex-col my-2">
@@ -508,24 +520,26 @@ const ChatArea = ({ messages, chatRef }) => {
  * @returns An area where chat messages can be input.
  */
 const InputBox = ({ inputText, handleInputChange, handleSendMessage }) => (
-  <div className="flex p-4">
-    <input
-      type="text"
-      placeholder="Type your message..."
-      value={inputText}
-      onChange={handleInputChange}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          handleSendMessage();
-        }
-      }}
-      className="w-full rounded-2xl border-2 border-gray-500 p-2 bg-transparent"
-    />
-    <button
-      className="bg-gray-700 text-white rounded-2xl px-4 py-2 ml-2 hover:bg-white hover:text-black"
-      onClick={handleSendMessage}
-    >
-      Send
-    </button>
+  <div className="fixed bottom-0 p-4 w-full">
+    <div className="flex">
+      <input
+        type="text"
+        placeholder="Type your message..."
+        value={inputText}
+        onChange={handleInputChange}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSendMessage();
+          }
+        }}
+        className="w-1/2 rounded-2xl border-2 border-gray-500 p-2 bg-transparent text-white"
+      />
+      <button
+        className="bg-gray-700 text-white rounded-2xl px-4 py-2 ml-2 hover:bg-white hover:text-black"
+        onClick={handleSendMessage}
+      >
+        Send
+      </button>
+    </div>
   </div>
 );
