@@ -5,6 +5,8 @@ export interface User {
 	games: Game[];
 	personaname: string;
 	avatarfull: string;
+  lobbygame: string;
+  lobbyleader: string;
 }
 
 export interface GamesServiceResponse {
@@ -21,6 +23,8 @@ export interface AuthServiceResponse {
 export interface UsersServiceResponse {
 	avatarfull: string;
 	personaname: string;
+  lobbygame: string;
+  lobbyleader: string;
 }
 
 export interface ListOfGames {

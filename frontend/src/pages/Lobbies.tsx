@@ -2,7 +2,7 @@ import '../App.css';
 import Header from '../components/header';
 import CreateLobbyForm from '../components/createlobbyform'
 import React, {useEffect, useMemo, useRef, useState } from 'react';
-import { defaultAvatarFull, Game, getCurrentLobby, getDateString, getGameImageUrl, Lobby, ReceivedMessage, SendMessage} from '../utilities';
+import { defaultAvatarFull, fetchUsersServiceAPI, Game, getCurrentLobby, getDateString, getGameImageUrl, Lobby, ReceivedMessage, SendMessage} from '../utilities';
 import { useAuth } from '../context/AuthContext';
 import useLobbySocket from '../hooks/useLobbySocket';
 
@@ -20,12 +20,14 @@ export default function Lobbies() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
+  const user = getUser();
+
   const currentLobby = useMemo<Lobby | null>(() => {
-    return getCurrentLobby(currentGame, currentLobbyList, getUser()) || null;
-  }, [currentGame, currentLobbyList, getUser]);
+    return getCurrentLobby(currentGame, currentLobbyList, user) || null;
+  }, [currentGame, currentLobbyList, user]);
 
   const { send, isOpen } = useLobbySocket(
-    getUser().jwttoken, currentGame?.appid || 0, currentLobby?.leader || "",
+    user.jwttoken, currentGame?.appid || 0, currentLobby?.leader || "",
     {
       addMessageToChat: (message: ReceivedMessage) => {
         addMessage(message)
@@ -40,7 +42,7 @@ export default function Lobbies() {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        setGameResults(getUser().games)
+        setGameResults(user.games)
       } catch (err) {
         console.error(err);
       }
@@ -117,8 +119,8 @@ export default function Lobbies() {
       const message: SendMessage = {
         action:       "sendmessage",
         text:         inputText,
-        suid:         getUser().uuid,
-        personaname:  getUser().personaname
+        suid:         user.uuid,
+        personaname:  user.personaname
       }
       send(message);
     }
@@ -129,6 +131,14 @@ export default function Lobbies() {
   const handleCreateLobby = async () => {
     setShowCreateForm(!showCreateForm);
   };
+
+  const handleMyLobby = async () => {
+    const resp = await fetchUsersServiceAPI(user.jwttoken);
+
+    if (resp?.lobbygame) {
+      setCurrentGame(user.games.find(game => game.appid === Number(resp.lobbygame)) || currentGame || null)
+    }
+  }
 
   // Handler to set the current game when a different game is clicked.
   const handleCurrentGame = async (newGame: Game) => {
@@ -192,6 +202,7 @@ export default function Lobbies() {
           currentGame={currentGame}
           currentLobbyList={currentLobbyList} 
           handleCreateLobby={handleCreateLobby} 
+          handleMyLobby={handleMyLobby}
           handleJoinLobby={handleJoinLobby}
           handleLeaveLobby={handleLeaveLobby}
         />
@@ -297,11 +308,14 @@ const LobbiesList = ({
     currentGame,
     currentLobbyList, 
     handleCreateLobby,
+    handleMyLobby,
     handleJoinLobby,
     handleLeaveLobby,
   }) => {
   const {getUser} = useAuth();
   const [loading, setLoading] = useState(false);
+
+  const user = getUser();
 
   useEffect(() => {
     setLoading(true);
@@ -323,7 +337,9 @@ const LobbiesList = ({
           Create Lobby
         </button>
         <button 
-          className='text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full'>
+          className='text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full'
+          onClick={handleMyLobby}
+        >
           My Lobby
         </button>
       </div>
@@ -344,7 +360,7 @@ const LobbiesList = ({
               <div className="flex justify-between mx-2 text-white text-xs items-center">
                 <p>{lobby.lobbyname}</p>
                 <div className='flex flex-row items-center'>
-                  {!(getUser().uuid in lobby.lobbyusers) &&
+                  {!(user.uuid in lobby.lobbyusers) &&
                     <button 
                       className='bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2'
                       onClick={() => {handleJoinLobby(currentGame.appid, lobby.leader)}}
@@ -380,13 +396,15 @@ const LobbiesList = ({
 const ChatArea = ({ messages, chatRef }) => {
   const {getUser} = useAuth();
 
+  const user = getUser();
+
   return (<div ref={chatRef} className="flex flex-col-reverse p-4 overflow-y-auto h-screen" style={{ maxHeight: 'calc(90vh - 200px)' }}>
     {messages.map((message: ReceivedMessage, index: number) => (
       <div key={index} className="flex-col my-2">
         <div className="flex flex-row items-baseline px-3 py-1">
           <div className="">
             <a href={`https://steamcommunity.com/profiles/${message.suid}`} target="_blank" rel="noreferrer">
-              <img src={message.suid === getUser().uuid ? getUser().avatarfull : (message.avatarfull || defaultAvatarFull)} className="max-w-full max-h-6" alt="User profile"/>
+              <img src={message.suid === user.uuid ? user.avatarfull : (message.avatarfull || defaultAvatarFull)} className="max-w-full max-h-6" alt="User profile"/>
             </a>
           </div>
           <div className="ml-1">

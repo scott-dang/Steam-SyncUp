@@ -40,6 +40,8 @@ func Handler(context context.Context, request events.APIGatewayProxyRequest) (ev
 	body := util.UsersServiceProfileInfoResponseBody{
 		AvatarFull:  user.AvatarFull,
 		PersonaName: user.PersonaName,
+		LobbyGame:   user.LobbyGame,
+		LobbyLeader: user.LobbyLeader,
 	}
 
 	responseBody, _ := json.Marshal(body)
