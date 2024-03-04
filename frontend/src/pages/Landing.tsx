@@ -5,14 +5,14 @@ import Carousel from "../components/carousel";
 import Header from "../components/header";
 import { useAuth } from "../context/AuthContext";
 
-function Landing() {
+function Landing({ setCurrentGame }) {
 	const { isLoggedIn } = useAuth();
 
 	return isLoggedIn() ? (
 		<div className="bg-[#1A1A1A] h-screen overflow-hidden">
 			<Header></Header>
 			<div className="h-full overflow-scroll">
-				<LandingBoxes></LandingBoxes>
+				<LandingBoxes setCurrentGame={setCurrentGame}></LandingBoxes>
 			</div>
 		</div>
 	) : (
