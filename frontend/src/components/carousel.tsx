@@ -83,6 +83,7 @@ const Carousel = ({ cards }) => {
 			transition();
 			setTimeout(() => setCurrentSlide((s) => s + 1), 3500);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentSlide]);
 
 	return (
