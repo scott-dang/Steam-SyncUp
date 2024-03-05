@@ -1,6 +1,6 @@
 import "../App.css";
-import Header from "../components/Header";
-import CreateLobbyForm from "../components/CreateLobbyForm";
+import Header from "../components/Header.tsx";
+import CreateLobbyForm from "../components/CreateLobbyForm.tsx";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchUsersServiceAPI,

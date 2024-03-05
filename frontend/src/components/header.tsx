@@ -98,7 +98,7 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {(location.pathname !== "/lobbies" && isLoggedIn()) &&
         // Lobbies button
-        <Link className="text-white text-2xl cursor-pointer hover:scale-110 duration-150" to="/lobbies">
+        <Link className="text-white text-xl cursor-pointer hover:scale-110 duration-150" to="/lobbies">
           <b>
             <em>
               Lobbies

@@ -2,7 +2,7 @@ import React from "react";
 import "../App.css";
 import LandingBoxes from "../components/LandingBoxes";
 import Carousel from "../components/carousel";
-import Header from "../components/header";
+import Header from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 
 function Landing({ setCurrentGame }) {
