@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { defaultAvatarFull } from "../utilities";
 import { useAuth } from "../context/AuthContext";
-import { Tooltip, Button } from "flowbite-react";
+import { Tooltip } from "flowbite-react";
 
 export const LobbyHeader = ({
   currentGame,
@@ -57,7 +57,7 @@ export const LobbyHeader = ({
                 target="_blank"
                 rel="noreferrer"
               >
-                <Tooltip content={user.personaname} style="dark">
+                <Tooltip content={user.personaname}>
                   <img
                     src={
                       user.SteamUUID === getUser().uuid
