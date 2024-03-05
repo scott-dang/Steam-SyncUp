@@ -1,16 +1,29 @@
-import React from "react";
+import React from 'react';
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
-export default function LandingBoxes() {
-	const { getUser } = useAuth();
+export default function LandingBoxes({ setCurrentGame }) {
+    const { getUser } = useAuth();
+
 
 	return (
 		<div className="grid grid-cols-6">
 			{(getUser().games || []).map((game, index) => {
+				<Link to="lobbies"></Link>
 				return (
-					<div
+					<Link
+						onMouseEnter={(e) => {
+							e.currentTarget.style.transform = "scale(1.05)";
+							e.currentTarget.style.boxShadow = "0 0 2px 2px white inset";
+					  	}}
+					  	onMouseLeave={(e) => {
+							e.currentTarget.style.transform = "scale(1)";
+					  	}}
+						
+						onClick={() => setCurrentGame(game)}
 						key={index}
 						className="bg-white p-3"
+						to="lobbies"
 						style={{
 							backgroundImage: `url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
 							backgroundSize: "cover",
@@ -51,7 +64,7 @@ export default function LandingBoxes() {
 								{game.name}
 							</h1>
 						</div>
-					</div>
+					</Link>
 				);
 			})}
 		</div>

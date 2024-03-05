@@ -177,10 +177,10 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {isLoggedIn() &&
         // Settings button
-        <Link className="text-white text-xl ml-10 hover:scale-110 duration-150" to="/settings">
+        <Link className="text-white text-xl ml-10 hover:scale-110 duration-150" to="/information">
           <b>
             <em>
-              Settings
+              Information
             </em>
           </b>
         </Link>
