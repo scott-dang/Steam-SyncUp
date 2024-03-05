@@ -29,7 +29,7 @@ export default function Lobbies() {
   const [inputText, setInputText] = useState<string>("");
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalState, setModalState] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const user = getUser();
@@ -205,9 +205,9 @@ export default function Lobbies() {
     }
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(!modalOpen)
-  }
+  const handleModalStateOpen = () => setModalState(true);
+  const handleModalStateClose = () => setModalState(false);
+
 
   return (
     <div className="h-screen overflow-hidden">
@@ -295,6 +295,13 @@ export default function Lobbies() {
           </div>
         )}
       </div>
+
+      <Modal opened={modalOpen} onClose={handleCloseModal} title="Settings modal">
+                  {/* Modal content */}
+                  <div>
+                    Settings modal
+                  </div>
+      </Modal>
 
       {/* Handles Create Lobby Form. */}
       {showCreateForm && (
