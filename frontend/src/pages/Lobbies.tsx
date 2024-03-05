@@ -15,6 +15,7 @@ import {
 } from "../utilities";
 import { useAuth } from "../context/AuthContext";
 import useLobbySocket from "../hooks/useLobbySocket";
+import { Modal } from "@mantine/core"
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -28,6 +29,7 @@ export default function Lobbies() {
   const [inputText, setInputText] = useState<string>("");
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const user = getUser();
@@ -202,6 +204,10 @@ export default function Lobbies() {
       }
     }
   };
+
+  const handleCloseModal = () => {
+    setModalOpen(!modalOpen)
+  }
 
   return (
     <div className="h-screen overflow-hidden">

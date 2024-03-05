@@ -87,8 +87,8 @@ export default function Header({currentGame, setCurrentGame}) {
   }
 
   return (
-    <div className="flex flex-row py-8 px-10 justify-between items-center bg-grayprimary">
-      <Link className="text-white text-4xl cursor-pointer hover:scale-110 duration-150" to="/">
+    <div className="flex flex-row py-2 px-10 justify-between items-center bg-grayprimary">
+      <Link className="text-white text-2xl cursor-pointer hover:scale-110 duration-150" to="/">
         <b>
           <em>
             Steam SyncUp
@@ -120,11 +120,11 @@ export default function Header({currentGame, setCurrentGame}) {
                 title={"Remove " + currentGame.name}
               >
                 <img
-                  className="h-12 w-12 cursor-pointer rounded-md"
+                  className="h-10 w-10 cursor-pointer rounded-md"
                   src={getGameImageUrl(currentGame.appid, currentGame.img_icon_url)}
                   alt={"Thumbnail of " + currentGame.name}
                 />
-                <span className="text-3xl text-white text-nowrap truncate ml-5">
+                <span className="text-xl text-white text-nowrap truncate ml-5">
                  <b>
                   <em>
                   {currentGame.name}
@@ -177,7 +177,7 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {isLoggedIn() &&
         // Settings button
-        <Link className="text-white text-2xl ml-10  hover:scale-110 duration-150" to="/settings">
+        <Link className="text-white text-xl ml-10 hover:scale-110 duration-150" to="/settings">
           <b>
             <em>
               Settings
@@ -195,7 +195,7 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {isLoggedIn() &&
         // Signout button
-        <Link onClick={logout} className="text-white text-2xl cursor-pointer hover:scale-110 duration-150" to="/">
+        <Link onClick={logout} className="text-white text-xl cursor-pointer hover:scale-110 duration-150" to="/">
           <b>
             <em>
               Sign Out
