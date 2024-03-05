@@ -3,12 +3,9 @@ import Header from "../components/Header";
 import CreateLobbyForm from "../components/CreateLobbyForm";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  defaultAvatarFull,
   fetchUsersServiceAPI,
   Game,
   getCurrentLobby,
-  getDateString,
-  getGameImageUrl,
   Lobby,
   ReceivedMessage,
   SendMessage,
@@ -32,7 +29,6 @@ export default function Lobbies() {
   const [inputText, setInputText] = useState<string>("");
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [modalState, setModalState] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const user = getUser();
@@ -208,9 +204,6 @@ export default function Lobbies() {
     }
   };
 
-  const handleModalStateOpen = () => setModalState(true);
-  const handleModalStateClose = () => setModalState(false);
-
   return (
     <div className="h-screen overflow-hidden">
       {/* Header bar. */}
@@ -240,9 +233,10 @@ export default function Lobbies() {
           <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
             
             <LobbyHeader 
-              currentGame={currentGame} 
-              currentLobby={currentLobby} 
-              getUser={getUser}            
+              currentGame={currentGame}
+              currentLobby={currentLobby}
+              fetchLobbies={fetchLobbies}        
+              getAuthToken={getAuthToken}
             />
 
             <ChatArea
