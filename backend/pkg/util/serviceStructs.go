@@ -43,12 +43,3 @@ type SendMessageServiceRequestBody struct {
 	SUID        string `json:"suid"`
 	Personaname string `json:"personaname"`
 }
-
-type SendMessageServiceConnectionsInput struct {
-	Key       ConnectionsKey `json:"key"`
-	TableName string         `json:"tableName"`
-}
-
-type SendMessageServiceConnectionsKey struct {
-	ConnectionID string `json:"connectionId"`
-}

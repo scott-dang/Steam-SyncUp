@@ -1,145 +1,3 @@
-/*
-const AWS = require('aws-sdk');
-const ddb = new AWS.DynamoDB.DocumentClient();
-
-exports.handler = async function (event, context) {
-
-  let parsedBody;
-  try {
-    parsedBody = JSON.parse(event.body);
-  } catch (e) {
-    console.log(e);
-    return {
-      statusCode: 500,
-    };
-  }
-
-  const necessaryFields = ["text", "suid", "personaname"];
-
-  if (!necessaryFields.every((field) => parsedBody[field])) {
-    console.log("Error: Missing field for message send");
-    return {
-      statusCode: 500,
-    };
-  }
-
-  const connectionId = event.requestContext.connectionId;
-
-  const data = {
-    text: parsedBody.text,
-    suid: parsedBody.suid,
-    timestamp: Date.now(),
-    personaname: parsedBody.personaname,
-  };
-
-  const connectionsInput = {
-    "Key": {
-      "connectionId": connectionId,
-    },
-    "TableName": "Connections"
-  };
-
-  let appid, leader;
-  try {
-    const result = await ddb.get(connectionsInput).promise();
-    appid = result.Item ? result.Item.appid : null;
-    leader = result.Item ? result.Item.leader : null;
-
-    if (!appid) {
-      throw new Error('No appid found for connection');
-    }
-    if (!leader) {
-      throw new Error('No leader found for connection');
-    }
-  } catch (err) {
-    console.error("Error retrieving connection item:", err);
-    return {
-      statusCode: 500,
-    };
-  }
-
-  const lobbiesInput = {
-    "Key": {
-      "leader": leader,
-      "appid": appid,
-    },
-    "TableName": "Lobbies"
-  };
-
-  let connections;
-  try {
-    const result = await ddb.get(lobbiesInput).promise();
-
-    connections = result.Item && result.Item.connectionIds ? result.Item.connectionIds.values : null;
-
-    if (!connections) {
-      throw new Error('No connections found');
-    }
-  } catch (err) {
-    console.error("Error retrieving connections:", err);
-    return {
-      statusCode: 500,
-    };
-  }
-
-
-  const updateMessagesInput = {
-    "Key": {
-      "leader": leader,
-      "appid": appid,
-    },
-    "TableName": "Lobbies",
-    UpdateExpression: "SET messages = list_append(if_not_exists(messages, :empty_list), :new_object)",
-    ExpressionAttributeValues: {
-        ":new_object": [data],
-        ":empty_list": []
-    },
-    ReturnValues: "UPDATED_NEW"
-  };
-
-   try {
-    await ddb
-      .update(updateMessagesInput)
-      .promise();
-  } catch (err) {
-    console.error("Error saving message:", err);
-    return {
-      statusCode: 500,
-    };
-  }
-
-  const callbackAPI = new AWS.ApiGatewayManagementApi({
-    apiVersion: '2018-11-29',
-    endpoint:
-      event.requestContext.domainName + '/' + event.requestContext.stage,
-  });
-
-  console.log("Connections: " + connections);
-  const sendMessages = connections.map(async (lobbyUserConnectionId) => {
-    if (lobbyUserConnectionId !== event.requestContext.connectionId) {
-      try {
-        await callbackAPI
-          .postToConnection({ ConnectionId: lobbyUserConnectionId, Data: JSON.stringify(data)})
-          .promise();
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  });
-
-  try {
-    await Promise.all(sendMessages);
-  } catch (e) {
-    console.log(e);
-    return {
-      statusCode: 500,
-    };
-  }
-
-  return { statusCode: 200 };
-};
-*/
-
 package sendmessage
 
 import (
@@ -152,11 +10,15 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
 	"github.com/scott-dang/Steam-SyncUp/pkg/model"
 	"github.com/scott-dang/Steam-SyncUp/pkg/util"
 )
 
-var authenticate = util.Authenticate
+var getUser = util.GetUser
 
 func Handler(context context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
 	parsedBody := util.SendMessageServiceRequestBody{}
@@ -165,7 +27,7 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body:       "{ \"error\": \"unable to parse request body\" }",
+			Body:       "{ \"error\": \"Unable to parse request body\" }",
 		}, nil
 	}
 
@@ -173,27 +35,19 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 	if parsedBody.Personaname == "" || parsedBody.SUID == "" || parsedBody.Text == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusNotFound,
-			Body:       "{ \"error\": \"missing request parameters\" }",
+			Body:       "{ \"error\": \"Missing field for message send\" }",
 		}, nil
 	}
 
 	connectionId := request.RequestContext.ConnectionID
 
-	data := model.Message{
-		Personaname: parsedBody.Personaname,
-		Suid:        parsedBody.SUID,
-		Text:        parsedBody.Text,
-		Timestamp:   strconv.FormatInt(time.Now().Unix(), 10),
-	}
-
-	connectionsInput := util.SendMessageServiceConnectionsInput{
-		Key: util.SendMessageServiceConnectionsKey{
-			ConnectionID: connectionId,
+	connectionsInput := &dynamodb.GetItemInput{
+		TableName: aws.String("Connections"),
+		Key: map[string]types.AttributeValue{
+			"connectionId": &types.AttributeValueMemberS{Value: connectionId},
 		},
-		TableName: "Connections",
 	}
 
-	// TODO: find the connection
 	config, err := config.LoadDefaultConfig(context)
 	client := dynamodb.NewFromConfig(config)
 
@@ -204,23 +58,160 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 		}, nil
 	}
 
-	result, err := util.GetConnectionsItem(connectionsInput, client, context)
+	result, err := client.GetItem(context, connectionsInput)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       "{ \"error\": \"unable to get connection item\" }",
+			Body: "{ \"error\": \"Error retrieving connection item: " + err.Error() + "\" }",
 		}, nil
 	}
 
-	appid := result.Item.Appid
-	leader := result.Item.Leader
+	appid := result.Item["appid"]
+	leader := result.Item["leader"]
 
-	if appid == "" {
-		
+  if appid == nil {
+    return events.APIGatewayProxyResponse{
+      StatusCode: http.StatusInternalServerError,
+      Body: "{ \"error\": \"No appid found for connection\" }",
+    }, nil
+  }
 
-	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-		Body:       string(responseBody),
-	}, nil
+  if leader == nil {
+    return events.APIGatewayProxyResponse{
+      StatusCode: http.StatusInternalServerError,
+      Body: "{ \"error\": \"No leader found for connection\" }",
+    }, nil
+  }
+
+  lobbiesInput := &dynamodb.GetItemInput{
+    TableName: aws.String("Lobbies"),
+    Key: map[string]types.AttributeValue{
+      "leader": leader,
+      "appid": appid,
+    },
+  }
+
+  result, err = client.GetItem(context, lobbiesInput)
+
+  if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body: "{ \"error\": \"Error retrieving connections: " + err.Error() + "\" }",
+		}, nil
+	}
+
+  connections := result.Item["connectionIds"].(*types.AttributeValueMemberL).Value
+
+  if connections == nil {
+    return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body: "{ \"error\": No connections found\" }",
+		}, nil
+  }
+
+  user, err := getUser(parsedBody.SUID, context)
+
+  if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body: "{ \"error\": \"Error retrieving user: " + err.Error() + "\" }",
+		}, nil
+	}
+
+  avatarFull := user.AvatarFull
+
+  if avatarFull == "" {
+    return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body: "{ \"error\": No user found\" }",
+		}, nil
+  }
+
+  message := model.Message{
+    Personaname: parsedBody.Personaname,
+    Suid: parsedBody.SUID,
+    Text: parsedBody.Text,
+    Timestamp: strconv.FormatInt(time.Now().Unix(), 10),
+    AvatarFull: avatarFull,
+  }
+
+  updateMessagesInput := &dynamodb.UpdateItemInput{
+    TableName: aws.String("Lobbies"),
+    Key: map[string]types.AttributeValue{
+      "leader": leader,
+      "appid": appid,
+    },
+    UpdateExpression: aws.String("SET messages = list_append(if_not_exists(messages, :empty_list), :new_object)"),
+    ExpressionAttributeValues: map[string]types.AttributeValue{
+      ":new_object": &types.AttributeValueMemberM{
+        Value: map[string]types.AttributeValue{
+          "text": &types.AttributeValueMemberS{Value: message.Text},
+          "suid": &types.AttributeValueMemberS{Value: message.Suid},
+          "timestamp": &types.AttributeValueMemberS{Value: message.Timestamp},
+          "personaname": &types.AttributeValueMemberS{Value: message.Personaname},
+          "avatarfull": &types.AttributeValueMemberS{Value: message.AvatarFull},
+        },
+      },
+      ":empty_list": &types.AttributeValueMemberL{
+        Value: []types.AttributeValue{},
+      },
+    },
+    ReturnValues: types.ReturnValueUpdatedNew,
+  }
+
+  _, err = client.UpdateItem(context, updateMessagesInput)
+
+  if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body: "{ \"error\": \"Error saving message: " + err.Error() + "\" }",
+		}, nil
+	}
+
+  session, err := session.NewSession()
+
+  if err != nil {
+    return events.APIGatewayProxyResponse{
+      StatusCode: http.StatusInternalServerError,
+      Body: "{ \"error\": \"Error creating new session: " + err.Error() + "\" }",
+    }, nil
+  }
+
+  callbackAPI := apigatewaymanagementapi.New(session, &aws.Config{
+    Endpoint: aws.String(request.RequestContext.DomainName + "/" + request.RequestContext.Stage),
+  })
+
+  messageJson, err := json.Marshal(message)
+
+  if err != nil {
+    return events.APIGatewayProxyResponse{
+      StatusCode: http.StatusInternalServerError,
+      Body: "{ \"error\": \"Error marshalling message: " + err.Error() + "\" }",
+    }, nil
+  }
+
+  for _, lobbyUserConnectionId := range connections {
+    lobbyUserConnectionIdString := lobbyUserConnectionId.(*types.AttributeValueMemberS).Value
+    if lobbyUserConnectionIdString != connectionId {
+      _, err = callbackAPI.PostToConnection(&apigatewaymanagementapi.PostToConnectionInput{
+        ConnectionId: &lobbyUserConnectionIdString,
+        Data: []byte(messageJson),
+      })
+
+      if err != nil {
+        return events.APIGatewayProxyResponse{
+          StatusCode: http.StatusInternalServerError,
+          Body: "{ \"error\": \"Error sending message: " + err.Error() + "\" }",
+        }, nil
+      }
+    }
+  }
+
+  return events.APIGatewayProxyResponse{
+    StatusCode: http.StatusOK,
+  }, nil
 }
+
+
+
