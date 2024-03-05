@@ -1,6 +1,6 @@
 import "../App.css";
-import Header from "../components/Header.tsx";
-import CreateLobbyForm from "../components/CreateLobbyForm.tsx";
+import Header from "../components/Header";
+import CreateLobbyForm from "../components/CreateLobbyForm";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchUsersServiceAPI,
@@ -14,8 +14,8 @@ import { useAuth } from "../context/AuthContext";
 import useLobbySocket from "../hooks/useLobbySocket";
 import { GamesList } from "../components/GamesList"
 import { LobbiesList } from "../components/LobbiesList"
-import { ChatArea, InputBox } from "../components/Chat.tsx"
-import { LobbyHeader } from "../components/LobbyHeader.tsx"
+import { ChatArea, InputBox } from "../components/Chat"
+import { LobbyHeader } from "../components/LobbyHeader"
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -80,9 +80,15 @@ export default function Lobbies({ game }) {
   }, [gameResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+
+    let timer: NodeJS.Timeout;
     if (currentGame) {
       fetchLobbies(currentGame.appid);
+
+      timer = setInterval(() => fetchLobbies(currentGame.appid), 5000);
     }
+
+    return () => clearTimeout(timer);
   }, [currentGame]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLobbies = async (gameId: number | null) => {
