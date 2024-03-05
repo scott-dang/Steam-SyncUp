@@ -351,6 +351,26 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		}, err
 	}
 
+	userInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("Users"),
+		Key: map[string]types.AttributeValue{
+			"SteamUUID": &types.AttributeValueMemberS{Value: user.SteamUUID},
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":lobbygame":   &types.AttributeValueMemberS{Value: game},
+			":lobbyleader": &types.AttributeValueMemberS{Value: leader},
+		},
+		UpdateExpression: aws.String("SET LobbyGame = :lobbygame, LobbyLeader = :lobbyleader"),
+	}
+
+	_, err = client.UpdateItem(context, userInput)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+		}, err
+	}
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 	}, nil
