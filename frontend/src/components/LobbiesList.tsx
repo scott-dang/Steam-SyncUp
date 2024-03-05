@@ -51,7 +51,7 @@ export const LobbiesList = ({
         </button>
       </div>
 
-      {/* Render either loading or lobbies list */}
+      {/* Renders the lobbies list with a refresh indicator at the bottom when loading or not loading*/}
       <ul className="pt-2">
           {currentLobbyList.map((lobby: Lobby, index: number) => (
             <li className="font-normal text-sm my-5" key={index}>
