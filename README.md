@@ -5,6 +5,8 @@
 # Steam-SyncUp
 Steam SyncUp enables users to find and join a game community, tailored to their specific game. By linking their Steam account, users can discuss, chat, and meet new users through the chat room feature. Users will also be able to find new games to play, discuss and learn about new content relevant to the game, and find others to play games together with one another.
 
+## Check it out here
+Link to website: https://main.d25wlrzzqu2q9m.amplifyapp.com
 
 <img src="https://github.com/scott-dang/Steam-SyncUp/assets/51427024/224735b2-3610-459a-b81d-a38b9aa6607a" width="49%" height="50%"/>
 <span> </span>
@@ -12,9 +14,6 @@ Steam SyncUp enables users to find and join a game community, tailored to their 
 
 ## Requirements
 A modern web browser with stable internet connection is needed along with a Steam account that has _game details_ set to public.
-
-## Access
-Link to website: https://main.d25wlrzzqu2q9m.amplifyapp.com
 
 ## Current functionality
 
