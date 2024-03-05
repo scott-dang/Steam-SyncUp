@@ -57,7 +57,7 @@ export const LobbyHeader = ({
       <div className="flex flex-row my-2 px-3 mr-10 justify-between items-center">
         <div className="flex flex-row">
           {Object.values(currentLobby?.lobbyusers).map(
-            (user: User, avatarfull, index) => {
+            (lobbyUser: User, avatarfull, index) => {
               return (
                 <div className="flex flex-col items-center mx-2">
                   <a
@@ -67,19 +67,19 @@ export const LobbyHeader = ({
                   >
                     <img
                       src={
-                        user.uuid === getUser().uuid
+                        lobbyUser.uuid === getUser().uuid
                           ? getUser().avatarfull
-                          : user.avatarfull || defaultAvatarFull
+                          : lobbyUser.avatarfull || defaultAvatarFull
                       }
                       className="hover:scale-110 duration-300 max-w-full max-h-12 rounded-3xl"
                       alt="User profile"
                     />
                   </a>
-                  {user.SteamUUID !== currentLobby.leader ? (
+                  {lobbyUser.SteamUUID !== currentLobby.leader ? (
                     <button
                       className="mt-2 text-sm border border-graysecondary w-full rounded-md hover:bg-white hover:text-black"
                       onClick={() =>
-                        handleKickUser(currentGame.appid, user.SteamUUID)
+                        handleKickUser(currentGame.appid, lobbyUser.SteamUUID)
                       }
                     >
                       Kick
