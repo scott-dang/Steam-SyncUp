@@ -296,12 +296,6 @@ export default function Lobbies() {
         )}
       </div>
 
-      <Modal opened={modalOpen} onClose={handleCloseModal} title="Settings modal">
-                  {/* Modal content */}
-                  <div>
-                    Settings modal
-                  </div>
-      </Modal>
 
       {/* Handles Create Lobby Form. */}
       {showCreateForm && (
