@@ -230,7 +230,7 @@ export default function Lobbies({ game }) {
 
         {/* Chat area space containing the scrolling chat area, and input box. */}
         {currentGame && currentLobby && (
-          <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
+          <div className="flex flex-col flex-grow bg-grayprimary border border-graysecondary rounded-3xl w-fit">
             
             <LobbyHeader 
               currentGame={currentGame}

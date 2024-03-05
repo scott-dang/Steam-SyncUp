@@ -152,7 +152,6 @@ export default function Header({currentGame, setCurrentGame}) {
             {searchResults.length > 0 && (
               // Searchbar dropdown
               <div className="absolute z-10 w-full bg-graysecondary rounded-3xl shadow-lg overflow-y-scroll max-h-[30vh]">
-
                 {searchResults.map((game: Game, index) => (
                   <div
                     key={index}

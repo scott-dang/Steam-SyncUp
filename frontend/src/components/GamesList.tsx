@@ -16,7 +16,7 @@ export const GamesList = ({ gameResults, currentGame, handleCurrentGame }) => {
   };
 
   return (
-    <div className="bg-grayprimary w-1/4 text-xl font-bold overflow-y-auto border border-graysecondary rounded-3xl">
+    <div className="bg-grayprimary w-1/6 text-xl font-bold overflow-y-auto border border-graysecondary rounded-3xl">
       <h2 className="p-2 text-center text-white bg-graysecondary rounded-xl m-2 drop-shad-xl">
         Games
       </h2>

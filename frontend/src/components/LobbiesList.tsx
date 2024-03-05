@@ -31,7 +31,7 @@ export const LobbiesList = ({
   }, [currentLobbyList]);
 
   return (
-    <div className="bg-grayprimary w-1/4 text-xl font-bold border border-graysecondary rounded-3xl">
+    <div className="bg-grayprimary w-1/6 text-xl font-bold border border-graysecondary rounded-3xl">
       <h2 className="p-2 m-2 rounded-xl bg-graysecondary text-center">
         Lobbies
       </h2>

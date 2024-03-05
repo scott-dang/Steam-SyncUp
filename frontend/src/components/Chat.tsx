@@ -15,7 +15,7 @@ export const ChatArea = ({ messages, chatRef }) => {
       <div
         ref={chatRef}
         className="flex flex-col-reverse p-4 overflow-y-auto h-screen"
-        style={{ maxHeight: "calc(85vh - 200px)" }}
+        style={{ maxHeight: "calc(90vh - 210px)" }}
       >
         {messages.map((message: ReceivedMessage, index: number) => (
           <div key={index} className="flex-col my-2">
@@ -67,8 +67,8 @@ export const ChatArea = ({ messages, chatRef }) => {
    * @returns An area where chat messages can be input.
    */
   export const InputBox = ({ inputText, handleInputChange, handleSendMessage }) => (
-    <div className="fixed bottom-0 p-4 w-full">
-      <div className="flex">
+    <div className="absolute bottom-0 w-[65%] p-5">
+      <div className="flex flex-row">
         <input
           type="text"
           placeholder="Type your message..."
@@ -79,7 +79,7 @@ export const ChatArea = ({ messages, chatRef }) => {
               handleSendMessage();
             }
           }}
-          className="w-1/2 rounded-2xl border-2 border-gray-500 p-2 bg-transparent text-white"
+          className="flex-grow rounded-2xl border-2 border-gray-500 p-2 bg-transparent text-white"
         />
         <button
           className="bg-gray-700 text-white rounded-2xl px-4 py-2 ml-2 hover:bg-white hover:text-black"
@@ -89,5 +89,6 @@ export const ChatArea = ({ messages, chatRef }) => {
         </button>
       </div>
     </div>
+
   );
   
