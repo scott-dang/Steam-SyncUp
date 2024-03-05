@@ -70,14 +70,14 @@ function Auth() {
 			navigate("/");
 			alert("Login failed!");
 			logout();
-		}, 6000);
+		}, 10000);
 
 		return () => clearTimeout(authTimeout);
 	});
 
 	return (
 		<div className="bg-[#1A1A1A] h-screen flex flex-col">
-			<Header />
+			<Header currentGame={null} setCurrentGame={() => {}} />
 			<div className="flex-grow flex justify-center items-center">
 				<MoonLoader
 					color="#9e9fa2"

@@ -91,6 +91,14 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		}, nil
 	}
 
+	// Make sure user is not in a lobby already
+	if user.LobbyLeader != "" || user.LobbyGame != "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       "{ \"error\": \"user is already in a lobby\" }",
+		}, nil
+	}
+
 	config, err := config.LoadDefaultConfig(context)
 	client := dynamodb.NewFromConfig(config)
 
@@ -100,45 +108,57 @@ func handleCreateLobby(context context.Context, request events.APIGatewayProxyRe
 		}, nil
 	}
 
-	// ensure that the user is not already in a lobby
-	found, _ := client.GetItem(context, &dynamodb.GetItemInput{
-		TableName: aws.String("Lobbies"),
-		Key: map[string]types.AttributeValue{
-			"appid":  &types.AttributeValueMemberN{Value: game},
-			"leader": &types.AttributeValueMemberS{Value: user.SteamUUID},
-		},
-	})
-
-	if len(found.Item) > 0 {
+	// Make sure user is not already in a lobby
+	if user.LobbyGame != "" || user.LobbyLeader != "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
-			Body:       "{ \"error\": \"user already owns a lobby\" }",
+			Body:       "{ \"error\": \"user is already in a lobby\" }",
 		}, nil
-
 	}
 
+	userDynamoDBAttribute := util.PublicUserToDynamoDBAttribute(util.UserToPublicUser(user))
+	lobbyUsersMapping := map[string]types.AttributeValue{user.SteamUUID: userDynamoDBAttribute}
+
 	// create the new lobby in dynamodb
-	input := &dynamodb.PutItemInput{
+	lobbyInput := &dynamodb.PutItemInput{
 		TableName: aws.String("Lobbies"),
 		Item: map[string]types.AttributeValue{
-			"leader":    &types.AttributeValueMemberS{Value: user.SteamUUID},
-			"appid":     &types.AttributeValueMemberN{Value: game},
-			"lobbyname": &types.AttributeValueMemberS{Value: name},
-			"lobbyusers": &types.AttributeValueMemberSS{
-				Value: []string{user.SteamUUID},
-			},
-			"maxusers": &types.AttributeValueMemberN{Value: maxusersStr},
-			"messages": &types.AttributeValueMemberL{},
+			"leader":     &types.AttributeValueMemberS{Value: user.SteamUUID},
+			"appid":      &types.AttributeValueMemberN{Value: game},
+			"lobbyname":  &types.AttributeValueMemberS{Value: name},
+			"lobbyusers": &types.AttributeValueMemberM{Value: lobbyUsersMapping},
+			"maxusers":   &types.AttributeValueMemberN{Value: maxusersStr},
+			"messages":   &types.AttributeValueMemberL{},
 		},
 	}
 
-	_, err = client.PutItem(context, input)
+	_, err = client.PutItem(context, lobbyInput)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-		}, nil
+		}, err
+	}
+
+	// update user in dynamodb to hold new lobby
+	userInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("Users"),
+		Key: map[string]types.AttributeValue{
+			"SteamUUID": &types.AttributeValueMemberS{Value: user.SteamUUID},
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":lobbygame":   &types.AttributeValueMemberS{Value: game},
+			":lobbyleader": &types.AttributeValueMemberS{Value: user.SteamUUID},
+		},
+		UpdateExpression: aws.String("SET LobbyGame = :lobbygame, LobbyLeader = :lobbyleader"),
+	}
+
+	_, err = client.UpdateItem(context, userInput)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+		}, err
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -203,6 +223,7 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	err = attributevalue.UnmarshalListOfMaps(response.Items, &lobbies)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 		}, nil
@@ -211,6 +232,7 @@ func handleGetLobbies(context context.Context, request events.APIGatewayProxyReq
 	responseBody, err := json.Marshal(lobbies)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 		}, nil
@@ -262,6 +284,14 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		}, nil
 	}
 
+	// Make sure user is not in a lobby already
+	if user.LobbyLeader != "" || user.LobbyGame != "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       "{ \"error\": \"user is already in a lobby\" }",
+		}, nil
+	}
+
 	// confirm that there is space in the lobby
 	response, err := client.GetItem(context, &dynamodb.GetItemInput{
 		TableName: aws.String("Lobbies"),
@@ -295,28 +325,30 @@ func handleJoinLobby(context context.Context, request events.APIGatewayProxyRequ
 		}, nil
 	}
 
+	userDynamoDBAttribute := util.PublicUserToDynamoDBAttribute(util.UserToPublicUser(user))
+
 	// add the user to the lobby
-	input := &dynamodb.UpdateItemInput{
+	lobbyInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
 			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: leader},
 		},
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":l": &types.AttributeValueMemberSS{
-				Value: []string{user.SteamUUID},
-			},
+		ExpressionAttributeNames: map[string]string{
+			"#SteamUUID": user.SteamUUID,
 		},
-		UpdateExpression: aws.String("ADD lobbyusers :l"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":user": userDynamoDBAttribute,
+		},
+		UpdateExpression: aws.String("SET lobbyusers.#SteamUUID = :user"),
 	}
 
-	_, err = client.UpdateItem(context, input)
+	_, err = client.UpdateItem(context, lobbyInput)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-		}, nil
+		}, err
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -380,34 +412,45 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 				Body:       "{ \"error\": \"" + err.Error() + "\" }",
 			}, nil
 		}
+	} else {
 
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusOK,
-		}, nil
-	}
-
-	// remove the user from the lobby
-	input := &dynamodb.UpdateItemInput{
-		TableName: aws.String("Lobbies"),
-		Key: map[string]types.AttributeValue{
-			"appid":  &types.AttributeValueMemberN{Value: game},
-			"leader": &types.AttributeValueMemberS{Value: leader},
-		},
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":l": &types.AttributeValueMemberSS{
-				Value: []string{user.SteamUUID},
+		// remove the user from the lobby
+		lobbyInput := &dynamodb.UpdateItemInput{
+			TableName: aws.String("Lobbies"),
+			Key: map[string]types.AttributeValue{
+				"appid":  &types.AttributeValueMemberN{Value: game},
+				"leader": &types.AttributeValueMemberS{Value: leader},
 			},
-		},
-		UpdateExpression: aws.String("DELETE lobbyusers :l"),
+			ExpressionAttributeNames: map[string]string{
+				"#SteamUUID": user.SteamUUID,
+			},
+			UpdateExpression: aws.String("REMOVE lobbyusers.#SteamUUID"),
+		}
+
+		_, err = client.UpdateItem(context, lobbyInput)
+
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, err
+		}
 	}
 
-	_, err = client.UpdateItem(context, input)
+	// remove the lobby from the user profile
+	userInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("Users"),
+		Key: map[string]types.AttributeValue{
+			"SteamUUID": &types.AttributeValueMemberS{Value: user.SteamUUID},
+		},
+		UpdateExpression: aws.String("REMOVE LobbyGame, LobbyLeader"),
+	}
+
+	_, err = client.UpdateItem(context, userInput)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-		}, nil
+		}, err
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -434,10 +477,10 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 	}
 
 	// validate correct request params
-	userToKick := request.QueryStringParameters["user"]
+	userToKickUUID := request.QueryStringParameters["user"]
 	game := request.QueryStringParameters["game"]
 
-	if game == "" || userToKick == "" {
+	if game == "" || userToKickUUID == "" {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "{ \"error\": \"missing required parameters\" }",
@@ -453,28 +496,49 @@ func HandleKickLobbyUser(context context.Context, request events.APIGatewayProxy
 		}, nil
 	}
 
+	userToKick, err := util.GetUser(userToKickUUID, context)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+
+	userInput := &dynamodb.UpdateItemInput{
+		TableName: aws.String("Users"),
+		Key: map[string]types.AttributeValue{
+			"SteamUUID": &types.AttributeValueMemberS{Value: userToKick.SteamUUID},
+		},
+		UpdateExpression: aws.String("REMOVE LobbyGame, LobbyLeader"),
+	}
+
+	_, err = client.UpdateItem(context, userInput)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+		}, err
+	}
+
 	// remove the user from the lobby
-	input := &dynamodb.UpdateItemInput{
+	lobbyInput := &dynamodb.UpdateItemInput{
 		TableName: aws.String("Lobbies"),
 		Key: map[string]types.AttributeValue{
 			"appid":  &types.AttributeValueMemberN{Value: game},
 			"leader": &types.AttributeValueMemberS{Value: user.SteamUUID},
 		},
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":l": &types.AttributeValueMemberSS{
-				Value: []string{userToKick},
-			},
+		ExpressionAttributeNames: map[string]string{
+			"#SteamUUID": userToKick.SteamUUID,
 		},
-		UpdateExpression: aws.String("DELETE lobbyusers :l"),
+		UpdateExpression: aws.String("REMOVE lobbyusers.#SteamUUID"),
 	}
 
-	_, err = client.UpdateItem(context, input)
+	_, err = client.UpdateItem(context, lobbyInput)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       "{ \"error\": \"" + err.Error() + "\" }",
-		}, nil
+		}, err
 	}
 
 	return events.APIGatewayProxyResponse{

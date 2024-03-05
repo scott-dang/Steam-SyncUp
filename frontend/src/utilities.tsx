@@ -5,6 +5,8 @@ export interface User {
 	games: Game[];
 	personaname: string;
 	avatarfull: string;
+  lobbygame: string;
+  lobbyleader: string;
 }
 
 export interface GamesServiceResponse {
@@ -21,6 +23,8 @@ export interface AuthServiceResponse {
 export interface UsersServiceResponse {
 	avatarfull: string;
 	personaname: string;
+  lobbygame: string;
+  lobbyleader: string;
 }
 
 export interface ListOfGames {
@@ -133,7 +137,7 @@ export const getCurrentLobby = (currentGame: Game | null, currentLobbyList: Lobb
     const result = currentLobbyList.find(lobby => {
 
       const sameGame = lobby.appid === currentGame.appid;
-      const hasUser = lobby.lobbyusers.includes(currentUser.uuid);
+      const hasUser = currentUser.uuid in lobby.lobbyusers;
 
       return sameGame && hasUser;
     });
@@ -143,22 +147,51 @@ export const getCurrentLobby = (currentGame: Game | null, currentLobbyList: Lobb
   return undefined;
 }
 
+export const getDateString = (date: Date): string => {
+  const timeString = date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "numeric",
+  });
+  const dateString = date.toLocaleDateString([], {});
+
+  if (date.getDay() === new Date().getDay()) {
+    return `Today at ${timeString}`;
+  } else if (date.getDay() === new Date().getDay() - 1) {
+    return `Yesterday at ${timeString}`;
+  }
+  return `${dateString} ${timeString}`;
+}
+
 export interface Lobby {
   name: string,
   leader: string,
   maxusers: number,
   lobbyname: string,
-  lobbyusers: string[],
+  lobbyusers: LobbyUsers,
   appid: number,
   messages: string[],
 }
 
-export interface Message {
+export interface LobbyUsers {
+  [key: string]: User,
+}
+
+export interface SendMessage {
   action:       string,
   text:         string,
   suid:         string,
   personaname:  string,
 }
+
+export interface ReceivedMessage {
+  text:         string,
+  suid:         string,
+  personaname:  string,
+  timestamp:    number,
+  avatarfull:   string,
+}
+
+export const defaultAvatarFull = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/b5/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg";
 
 export const authServiceEndpointURL: URL = new URL(
 	"https://og8ukicoij.execute-api.us-west-2.amazonaws.com/default/auth"
