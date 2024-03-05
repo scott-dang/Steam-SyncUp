@@ -1,5 +1,5 @@
 import '../App.css';
-import SteamButton from './steam_button.png'
+import SteamButton from '../assets/steam_button.png'
 import { Link, useLocation } from 'react-router-dom';
 import React, { FocusEvent, FormEvent, useState } from 'react';
 import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl, steamOpenIdEndpointUrl } from '../utilities';

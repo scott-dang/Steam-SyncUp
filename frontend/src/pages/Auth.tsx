@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
-import Header from "../components/header";
+import Header from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 import {
 	authServiceEndpointURL,

@@ -1,6 +1,6 @@
 import "../App.css";
 import React from "react";
-import Header from "../components/header";
+import Header from "../components/Header";
 import LandingBoxes from "../components/LandingBoxes";
 
 function Landing() {
