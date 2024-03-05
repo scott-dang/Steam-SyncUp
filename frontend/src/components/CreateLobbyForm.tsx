@@ -5,6 +5,7 @@ export default function CreateLobbyForm({ onClose, gameId, fetchLobbies }) {
     const {getAuthToken} = useAuth();
 
     const [currentLobbyName, setCurrentLobbyName] = useState<string>("");
+    const [currentLobbySize, setCurrentLobbySize] = useState<string>("4");
 
     const createLobby = async () => {
         try {
@@ -12,11 +13,11 @@ export default function CreateLobbyForm({ onClose, gameId, fetchLobbies }) {
             const createLobbyServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/CreateLobby")
             createLobbyServiceEndpointURL.searchParams.set("game", gameId)
             createLobbyServiceEndpointURL.searchParams.set("name", currentLobbyName)
-            // TODO: Make maxusers a user defined value
-            createLobbyServiceEndpointURL.searchParams.set("maxusers", "4")
+            createLobbyServiceEndpointURL.searchParams.set("maxusers", currentLobbySize)
 
             console.log("Creating lobby")
             setCurrentLobbyName("")
+            setCurrentLobbySize("4")
             
             const resp = await fetch(createLobbyServiceEndpointURL, {
             headers: {
@@ -35,8 +36,12 @@ export default function CreateLobbyForm({ onClose, gameId, fetchLobbies }) {
         }
     }
     
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCurrentLobbyName(e.target.value)
+    }
+
+    const handleSizeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCurrentLobbySize(e.target.value)
     }
 
     return (
@@ -50,7 +55,18 @@ export default function CreateLobbyForm({ onClose, gameId, fetchLobbies }) {
                 id="lobbyName"
                 type="text"
                 placeholder="Enter Lobby Name"
-                onChange={handleInputChange}
+                onChange={handleNameInputChange}
+                />
+            </div>
+            <div className="mb-4">
+                <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight "
+                id="lobbySize"
+                type="number"
+                min="2"
+                max="10"
+                placeholder="Enter Number of Players"
+                onChange={handleSizeInputChange}
                 />
             </div>
             <div className="flex justify-end">
