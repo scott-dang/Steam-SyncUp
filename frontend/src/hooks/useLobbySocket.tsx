@@ -57,6 +57,9 @@ const useLobbySocket = (jwttoken: string, appid: number, leader: string, options
       // When we send a message, we can create our own client sided timestamp
       // Our message does not get sent to ourselves again over the WebSocket
       timestamp: Date.now(),
+      mergetimestamp: Date.now(),
+      // addMessageToChat fn will handle getting the user avatar if falsy
+      avatarfull: "",
       ...message,
     }
     addMessageToChat(receivedMessage)

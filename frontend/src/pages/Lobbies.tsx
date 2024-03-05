@@ -7,6 +7,8 @@ import {
   Game,
   getCurrentLobby,
   Lobby,
+  mergeFullMessageHistory,
+  mergeIncomingMessage,
   ReceivedMessage,
   SendMessage,
 } from "../utilities";
@@ -64,11 +66,11 @@ export default function Lobbies({ game }) {
     fetchGames();
   });
 
-  // Updates the chat messages when new messages arrive.
+  // TODO: Stick chat scroll to bottom if within threshold, else keep current position
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
+    }  
   }, [messages]);
 
   // Sets the current game when game results are non-zero (first fetch).
@@ -85,11 +87,30 @@ export default function Lobbies({ game }) {
     if (currentGame) {
       fetchLobbies(currentGame.appid);
 
-      timer = setInterval(() => fetchLobbies(currentGame.appid), 5000);
+      // TODO: Make the refresh polling independent of messages
+      // timer = setInterval(() => {
+      //   if (currentGame) {
+      //     const currentScrollPos = chatRef.current?.scrollTop;
+      //     fetchLobbies(currentGame.appid);
+      //     if (chatRef.current && currentScrollPos) {
+      //       chatRef.current.scrollTop = currentScrollPos;
+      //     }
+      //   }
+      // }, 5000);
     }
 
     return () => clearTimeout(timer);
   }, [currentGame]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Updates messages based on fetched message history
+  useEffect(() => {
+    if (currentGame && currentLobbyList && currentLobby) {
+      console.log([...currentLobby.messages])
+      setMessages(mergeFullMessageHistory([...currentLobby.messages]));
+    } else {
+      setMessages([]);
+    }
+  }, [currentLobby, currentGame, currentLobbyList]);
 
   const fetchLobbies = async (gameId: number | null) => {
     if (gameId) {
@@ -101,7 +122,7 @@ export default function Lobbies({ game }) {
           },
         });
 
-        const data = await response.json();
+        const data: Lobby[] = await response.json();
 
         if (response.ok) {
           setCurrentLobbyList(data);
@@ -112,16 +133,9 @@ export default function Lobbies({ game }) {
     }
   };
 
-  const handleOldMessages = (): string[] => {
-    if (isOpen && currentGame && currentLobbyList && currentLobby) {
-      return currentLobby.messages;
-    }
-    return [];
-  };
-
   // Add new message to chat area.
   const addMessage = (message: ReceivedMessage) => {
-    setMessages((prevMessages) => [...prevMessages, message]);
+    setMessages((prevMessages) => mergeIncomingMessage([...prevMessages], message));
   };
 
   // Handler for the text box input.
@@ -246,7 +260,7 @@ export default function Lobbies({ game }) {
             />
 
             <ChatArea
-              messages={[...handleOldMessages(), ...messages].reverse()}
+              messages={[...messages]}
               chatRef={chatRef}
             />
 
