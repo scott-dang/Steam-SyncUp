@@ -1,6 +1,6 @@
 import React from "react";
 import { User, defaultAvatarFull } from "../utilities";
-import { useAuth,  } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * Function component for a lobby's header.
@@ -9,34 +9,38 @@ import { useAuth,  } from "../context/AuthContext";
  * @returns An area containing lobby information including
  * a banner, current users, lobby name, and settings.
  */
-export const LobbyHeader = ({ currentGame, currentLobby, fetchLobbies, getAuthToken }) => {
+export const LobbyHeader = ({
+  currentGame,
+  currentLobby,
+  fetchLobbies,
+  getAuthToken,
+}) => {
+  const handleKickUser = async (
+    gameId: number | null,
+    userToKick: number | null,
+  ) => {
+    console.log("Attempting to kick user: ", userToKick);
+    if (getUser().uuid === currentLobby.leader && gameId && userToKick) {
+      const url: string = `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/KickLobbyUser${gameId.toString()}&user=${userToKick.toString()}`;
 
-	const handleKickUser = async (
-		gameId: number | null,
-		userToKick: number | null
-	) => {
-		console.log("Attempting to kick user: ", userToKick)
-		if (getUser().uuid === currentLobby.leader && gameId && userToKick) {
-			const url: string = `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/KickLobbyUser${gameId.toString()}&user=${userToKick.toString()}`;
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${getAuthToken()}`,
+          },
+        });
 
-			try {
-				const response = await fetch(url, {
-					headers: {
-						Authorization: `Bearer ${getAuthToken()}`,
-					},
-				});
+        if (response.ok && currentGame) {
+          console.log(`User ${userToKick} removed.`);
+          await fetchLobbies(currentGame.appid);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
-				if (response.ok && currentGame) {
-					console.log(`User ${userToKick} removed.`)
-					await fetchLobbies(currentGame.appid);
-				}
-			} catch (err) {
-				console.error(err);
-			}
-		}
-	}
-
-	const { getUser } = useAuth();
+  const { getUser } = useAuth();
 
   return (
     <div>
@@ -72,10 +76,12 @@ export const LobbyHeader = ({ currentGame, currentLobby, fetchLobbies, getAuthTo
                     />
                   </a>
                   {user.SteamUUID !== currentLobby.leader ? (
-                    <button 
-											className="mt-2 text-sm border border-graysecondary w-full rounded-md hover:bg-white hover:text-black"
-											onClick={() => handleKickUser(currentGame.appid, user.SteamUUID)}
-											>
+                    <button
+                      className="mt-2 text-sm border border-graysecondary w-full rounded-md hover:bg-white hover:text-black"
+                      onClick={() =>
+                        handleKickUser(currentGame.appid, user.SteamUUID)
+                      }
+                    >
                       Kick
                     </button>
                   ) : (
@@ -90,8 +96,7 @@ export const LobbyHeader = ({ currentGame, currentLobby, fetchLobbies, getAuthTo
         <div className="mr-20">{currentLobby.lobbyname}</div>
 
         {currentLobby.leader === getUser().personaname ? (
-          <button>
-						Lobby Settings</button>
+          <button>Lobby Settings</button>
         ) : (
           <button>Settings</button>
         )}
