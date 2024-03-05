@@ -36,7 +36,7 @@ export const LobbiesList = ({
         Lobbies
       </h2>
 
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center mb-2">
         <button
           className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full"
           onClick={handleCreateLobby}
@@ -52,7 +52,7 @@ export const LobbiesList = ({
       </div>
 
       {/* Renders the lobbies list with a refresh indicator at the bottom when loading or not loading*/}
-      <ul className="pt-2">
+      <ul>
           {currentLobbyList.map((lobby: Lobby, index: number) => (
             <li className="font-normal text-sm my-5" key={index}>
               <div className="flex justify-between mx-2 text-white text-xs items-center">
