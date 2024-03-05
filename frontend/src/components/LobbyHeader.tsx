@@ -1,5 +1,5 @@
 import React from "react";
-import { User, defaultAvatarFull } from "../utilities";
+import { defaultAvatarFull } from "../utilities";
 import { useAuth } from "../context/AuthContext";
 
 /**
