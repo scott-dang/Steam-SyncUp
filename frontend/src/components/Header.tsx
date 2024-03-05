@@ -1,5 +1,5 @@
 import '../App.css';
-import SteamButton from './steam_button.png'
+import SteamButton from '../assets/steam_button.png'
 import { Link, useLocation } from 'react-router-dom';
 import React, { FocusEvent, FormEvent, useState } from 'react';
 import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl, steamOpenIdEndpointUrl } from '../utilities';
@@ -87,15 +87,23 @@ export default function Header({currentGame, setCurrentGame}) {
   }
 
   return (
-    <div className="flex flex-row justify-between pt-10 px-10 pb-10 bg-grayprimary">
-      <Link className="text-white text-3xl cursor-pointer" to="/">
-        Steam SyncUp
+    <div className="flex flex-row py-2 px-10 justify-between items-center bg-grayprimary">
+      <Link className="text-white text-2xl cursor-pointer hover:scale-110 duration-150" to="/">
+        <b>
+          <em>
+            Steam SyncUp
+          </em>
+        </b>
       </Link>
 
       {(location.pathname !== "/lobbies" && isLoggedIn()) &&
         // Lobbies button
-        <Link className="text-white text-2xl cursor-pointer" to="/lobbies">
-          Lobbies
+        <Link className="text-white text-xl cursor-pointer hover:scale-110 duration-150" to="/lobbies">
+          <b>
+            <em>
+              Lobbies
+            </em>
+          </b>
         </Link>
       }
 
@@ -107,17 +115,21 @@ export default function Header({currentGame, setCurrentGame}) {
             {(location.pathname === "/lobbies" && currentGame) ?
               // Replace searchbar input with selected game
               <div
-                className="flex flex-row items-center justify-center cursor-pointer w-full"
+                className="flex flex-row items-center justify-center cursor-pointer w-full hover:scale-110 duration-150"
                 onClick={() => setCurrentGame(null)}
                 title={"Remove " + currentGame.name}
               >
                 <img
-                  className="h-12 w-12 cursor-pointer"
+                  className="h-10 w-10 cursor-pointer rounded-md"
                   src={getGameImageUrl(currentGame.appid, currentGame.img_icon_url)}
                   alt={"Thumbnail of " + currentGame.name}
                 />
-                <span className="text-3xl text-white text-nowrap truncate ml-5">
-                 {currentGame.name}
+                <span className="text-xl text-white text-nowrap truncate ml-5">
+                 <b>
+                  <em>
+                  {currentGame.name}
+                  </em>
+                 </b>
                 </span>
               </div>
               :
@@ -140,7 +152,6 @@ export default function Header({currentGame, setCurrentGame}) {
             {searchResults.length > 0 && (
               // Searchbar dropdown
               <div className="absolute z-10 w-full bg-graysecondary rounded-3xl shadow-lg overflow-y-scroll max-h-[30vh]">
-
                 {searchResults.map((game: Game, index) => (
                   <div
                     key={index}
@@ -164,9 +175,13 @@ export default function Header({currentGame, setCurrentGame}) {
       }
 
       {isLoggedIn() &&
-        // Info button
-        <Link className="text-white text-2xl ml-10" to="/information">
-          Information
+        // Information button
+        <Link className="text-white text-xl ml-10 hover:scale-110 duration-150" to="/information">
+          <b>
+            <em>
+              Information
+            </em>
+          </b>
         </Link>
       }
 
@@ -179,8 +194,12 @@ export default function Header({currentGame, setCurrentGame}) {
 
       {isLoggedIn() &&
         // Signout button
-        <Link onClick={logout} className="text-white text-2xl cursor-pointer" to="/">
-          Sign out
+        <Link onClick={logout} className="text-white text-xl cursor-pointer hover:scale-110 duration-150" to="/">
+          <b>
+            <em>
+              Sign Out
+            </em>
+          </b>
         </Link>
       }
     </div>

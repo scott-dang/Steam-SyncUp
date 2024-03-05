@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import React from 'react';
-import Header from '../components/header';
+import Header from '../components/Header';
 
 describe('renders Header component as a non-authenticated user', () => {
 
   test('given a lobby route and non-authenticated user', () => {
       render(
         <MemoryRouter initialEntries={['/lobbies']}> 
-          <Header />
+          <Header currentGame={undefined} setCurrentGame={undefined} />
         </MemoryRouter>
       );
 
@@ -31,7 +31,7 @@ describe('renders Header component as a non-authenticated user', () => {
   test('given a non-lobby route and non-authenticated user', () => {
       render(
         <MemoryRouter initialEntries={['/']}> 
-          <Header />
+          <Header currentGame={undefined} setCurrentGame={undefined} />
         </MemoryRouter>
       );
 

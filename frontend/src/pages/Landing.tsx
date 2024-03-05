@@ -2,7 +2,7 @@ import React from "react";
 import "../App.css";
 import LandingBoxes from "../components/LandingBoxes";
 import Carousel from "../components/carousel";
-import Header from "../components/header";
+import Header from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 
 function Landing({ setCurrentGame }) {
@@ -10,14 +10,14 @@ function Landing({ setCurrentGame }) {
 
 	return isLoggedIn() ? (
 		<div className="bg-[#1A1A1A] h-screen overflow-hidden">
-			<Header></Header>
+			<Header currentGame={undefined} setCurrentGame={undefined}></Header>
 			<div className="h-full overflow-scroll">
 				<LandingBoxes setCurrentGame={setCurrentGame}></LandingBoxes>
 			</div>
 		</div>
 	) : (
 		<div className="bg-[#1A1A1A] h-screen overflow-hidden">
-			<Header></Header>
+			<Header currentGame={undefined} setCurrentGame={undefined}></Header>
 			<Carousel
 				cards={[
 					{
