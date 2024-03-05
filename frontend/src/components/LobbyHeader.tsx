@@ -21,7 +21,7 @@ export const LobbyHeader = ({
   ) => {
     console.log("Attempting to kick user: ", userToKick);
     if (getUser().uuid === currentLobby.leader && gameId && userToKick) {
-      const url: string = `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/KickLobbyUser${gameId.toString()}&user=${userToKick.toString()}`;
+      const url: string = `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/KickLobbyUser?game=${gameId.toString()}&user=${userToKick.toString()}`;
 
       try {
         const response = await fetch(url, {
@@ -75,7 +75,7 @@ export const LobbyHeader = ({
                       alt="User profile"
                     />
                   </a>
-                  {user.SteamUUID !== currentLobby.leader ? (
+                  {getUser().uuid === currentLobby.leader && user.SteamUUID !== currentLobby.leader ? (
                     <button
                       className="mt-2 text-sm border border-graysecondary w-full rounded-md hover:bg-white hover:text-black"
                       onClick={() =>
