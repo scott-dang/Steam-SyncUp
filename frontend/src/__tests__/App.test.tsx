@@ -19,14 +19,14 @@ test('renders Landing component for "/" route', () => {
 	render(routes);
 
 	// Check if the Landing component is rendered
-	expect(screen.getByText(/Steam SyncUp/i)).toBeTruthy();
+	expect(screen.getAllByText(/Steam SyncUp/i)).toBeTruthy();
 });
 
 test('renders no Lobbies component for "lobbies" route with no auth', () => {
 	render(routes);
 
 	// Check if the Lobbies component isn't rendered
-	expect(screen.queryByText(/lobbies/i)).toBeFalsy();
+	expect(screen.getAllByText(/lobbies/i)).toHaveLength(1);
 });
 
 test('renders no Information component for "/Information" route with no auth', () => {

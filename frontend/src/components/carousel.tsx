@@ -9,77 +9,74 @@ const Carousel = ({ cards }) => {
 	const [currentSlide, setCurrentSlide] = useState(0);
 
 	const transition = useCallback(() => {
-    return cards.map((card: Card, index: number) => {
-      let style1 = "";
-      let style2 = "";
-      switch (index) {
-        case (currentSlide - 1) % cards.length:
-          style1 =
-            "-translate-x-full opacity-0 duration-1000 ease-in-out";
-          style2 = "opacity-0 duration-1000 ease-in-out";
-          break;
-        case currentSlide % cards.length:
-          style1 =
-            "translate-x-0 opacity-1 duration-1000 ease-in-out";
-          style2 = "opacity-1 duration-1000 ease-in-out";
-          break;
-        case (currentSlide + 1) % cards.length:
-          style1 = "translate-x-full opacity-0";
-          style2 = "opacity-0";
-          break;
-        default:
-          style1 = "opacity-0";
-          style2 = "opacity-0";
-          break;
-      }
-      return (
-        <div
-          key={index}
-          className={`w-full absolute ${style2}`}
-          style={{
-            backgroundImage: `url(${card.image})`,
-            backgroundSize: "cover",
-          }}
-        >
-          <div className="absolute inset-0 backdrop-blur-lg"></div>
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle, transparent, rgba(0,0,0,1))",
-            }}
-          ></div>
-          <div className={style1}>
-            <img
-              src={card.image}
-              className="relative w-1/4 mx-auto mt-10 rounded-lg"
-              alt={card.caption}
-              style={{ boxShadow: "0 0 10px 5px gray" }}
-            />
-            <h1
-              className="relative text-3xl text-center text-white mb-10 mt-3"
-              style={{
-                textShadow:
-                  "2px 2px black, -2px -2px black, 2px -2px black, -2px 2px black",
-              }}
-            >
-              {card.caption}
-            </h1>
-          </div>
-        </div>
-      );
-    })
+		return cards.map((card: Card, index: number) => {
+			let style1 = "";
+			let style2 = "";
+			switch (index) {
+				case (currentSlide - 1) % cards.length:
+					style1 =
+						"-translate-x-full opacity-0 duration-1000 ease-in-out";
+					style2 = "opacity-0 duration-1000 ease-in-out";
+					break;
+				case currentSlide % cards.length:
+					style1 =
+						"translate-x-0 opacity-1 duration-1000 ease-in-out";
+					style2 = "opacity-1 duration-1000 ease-in-out";
+					break;
+				case (currentSlide + 1) % cards.length:
+					style1 = "translate-x-full opacity-0";
+					style2 = "opacity-0";
+					break;
+				default:
+					style1 = "opacity-0";
+					style2 = "opacity-0";
+					break;
+			}
+			return (
+				<div
+					key={index}
+					className={`w-full absolute ${style2}`}
+					style={{
+						backgroundImage: `url(${card.image})`,
+						backgroundSize: "cover",
+					}}
+				>
+					<div className="absolute inset-0 backdrop-blur-lg"></div>
+					<div
+						className="absolute inset-0"
+						style={{
+							background:
+								"radial-gradient(circle, transparent, rgba(0,0,0,1))",
+						}}
+					></div>
+					<div className={style1}>
+						<img
+							src={card.image}
+							className="relative w-1/4 mx-auto mt-10 rounded-lg"
+							alt={card.caption}
+							style={{ boxShadow: "0 0 10px 5px gray" }}
+						/>
+						<h1
+							className="relative text-3xl text-center text-white mb-10 mt-3"
+							style={{
+								textShadow:
+									"2px 2px black, -2px -2px black, 2px -2px black, -2px 2px black",
+							}}
+						>
+							{card.caption}
+						</h1>
+					</div>
+				</div>
+			);
+		});
 	}, [cards, currentSlide]);
 
-	const slides = useMemo(
-    () => transition(), 
-    [transition]
-  );
+	const slides = useMemo(() => transition(), [transition]);
 
 	useEffect(() => {
-    const timer = setTimeout(() => setCurrentSlide((s) => s + 1), 3500);
+		const timer = setTimeout(() => setCurrentSlide((s) => s + 1), 3500);
 
-    return () => clearTimeout(timer);
+		return () => clearTimeout(timer);
 	}, [currentSlide]);
 
 	return (
