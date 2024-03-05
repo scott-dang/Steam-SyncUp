@@ -15,11 +15,10 @@ import {
 } from "../utilities";
 import { useAuth } from "../context/AuthContext";
 import useLobbySocket from "../hooks/useLobbySocket";
-import { Modal } from "@mantine/core"
-
 import { GamesList } from "../components/GamesList"
 import { LobbiesList } from "../components/LobbiesList"
 import { ChatArea, InputBox } from "../components/Chat.tsx"
+import { LobbyHeader } from "../components/LobbyHeader.tsx"
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -212,7 +211,6 @@ export default function Lobbies() {
   const handleModalStateOpen = () => setModalState(true);
   const handleModalStateClose = () => setModalState(false);
 
-
   return (
     <div className="h-screen overflow-hidden">
       {/* Header bar. */}
@@ -240,51 +238,12 @@ export default function Lobbies() {
         {/* Chat area space containing the scrolling chat area, and input box. */}
         {currentGame && currentLobby && (
           <div className="flex flex-col bg-grayprimary w-full border border-graysecondary rounded-3xl">
-            <div
-              className="flex items-center px-5 bg-graysecondary h-20 text-white font-bold text-4xl border border-graysecondary rounded-3xl"
-              style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${currentGame.appid}/header.jpg)`,
-                backgroundSize: "fit",
-              }}
-            >
-              {currentGame && currentGame.name}
-            </div>
-
-            <div className="flex flex-row my-2 mx-5 px-3 justify-between items-center">
-              <div className="flex flex-row ">
-                {Object.values(currentLobby?.lobbyusers).map(
-                  (user, avatarfull, index) => (
-                    <a
-                      href={`https://steamcommunity.com/profiles/${user}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <img
-                        src={
-                          user.uuid === getUser().uuid
-                            ? getUser().avatarfull
-                            : user.avatarfull || defaultAvatarFull
-                        }
-                        className="hover:scale-125 duration-300 max-w-full max-h-12 rounded-3xl"
-                        alt="User profile"
-                      />
-                    </a>
-                  ),
-                )}
-              </div>
-
-              <div>{currentLobby.lobbyname}</div>
-
-              {currentLobby.leader === getUser().personaname ? (
-                <button>
-                  Lobby Settings
-                </button>
-              ) : (
-                <button>
-                  Settings
-                </button>
-              )}
-            </div>
+            
+            <LobbyHeader 
+              currentGame={currentGame} 
+              currentLobby={currentLobby} 
+              getUser={getUser}            
+            />
 
             <ChatArea
               messages={[...handleOldMessages(), ...messages].reverse()}
