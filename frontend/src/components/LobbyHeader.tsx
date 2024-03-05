@@ -50,7 +50,7 @@ export const LobbyHeader = ({ currentGame, currentLobby, fetchLobbies, getAuthTo
         {currentGame && currentGame.name}
       </div>
 
-      <div className="flex flex-row my-2 px-3 justify-between items-center">
+      <div className="flex flex-row my-2 px-3 mr-10 justify-between items-center">
         <div className="flex flex-row">
           {Object.values(currentLobby?.lobbyusers).map(
             (user: User, avatarfull, index) => {
@@ -87,7 +87,7 @@ export const LobbyHeader = ({ currentGame, currentLobby, fetchLobbies, getAuthTo
           )}
         </div>
 
-        <div>{currentLobby.lobbyname}</div>
+        <div className="mr-20">{currentLobby.lobbyname}</div>
 
         {currentLobby.leader === getUser().personaname ? (
           <button>
