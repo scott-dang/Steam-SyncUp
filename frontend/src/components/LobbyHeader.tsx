@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { defaultAvatarFull } from "../utilities";
 import { useAuth } from "../context/AuthContext";
-import { Tooltip, Button, Modal } from "flowbite-react";
 
 export const LobbyHeader = ({
   currentGame,
@@ -49,44 +48,47 @@ export const LobbyHeader = ({
       </div>
 
       <div className="flex flex-row my-4 px-3 mr-10 justify-between items-center">
-        <div className="flex flex-row">
-          {Object.values(currentLobby?.lobbyusers).map((user, index) => (
-            <div className="flex flex-col items-center mx-2" key={index}>
-              <a
-                href={`https://steamcommunity.com/profiles/${user.SteamUUID}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Tooltip content={user.personaname}>
-                  <img
-                    src={
-                      user.SteamUUID === getUser().uuid
-                        ? getUser().avatarfull
-                        : user.avatarfull || defaultAvatarFull
-                    }
-                    className="hover:scale-110 duration-300 max-h-12 rounded-3xl"
-                    alt="User profile"
-                  />
-                </Tooltip>
-              </a>
-              {getUser().uuid === currentLobby.leader &&
-              user.SteamUUID !== currentLobby.leader ? (
-                <button
-                  className="mt-2 text-sm border border-graysecondary w-full rounded-md hover:bg-white hover:text-black"
-                  onClick={() =>
-                    handleKickUser(currentGame.appid, user.SteamUUID)
-                  }
-                >
-                  Kick
-                </button>
-              ) : null}
-            </div>
-          ))}
+        <div className="flex flex-row my-4 px-3 mr-10 justify-between items-center">
+          <div className="flex flex-row">
+            {Object.values(currentLobby?.lobbyusers).map(
+              (user, avatarfull, index) => {
+                return (
+                  <div className="flex flex-col items-center mx-2">
+                    <a
+                      href={`https://steamcommunity.com/profiles/${user}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img
+                        src={
+                          user.SteamUUID === getUser().uuid
+                            ? getUser().avatarfull
+                            : user.avatarfull || defaultAvatarFull
+                        }
+                        className="hover:scale-110 duration-300 max-h-12 rounded-3xl"
+                        alt="User profile"
+                      />
+                    </a>
+                    {user.SteamUUID !== currentLobby.leader ? (
+                      <button
+                        className="mt-2 text-sm border border-graysecondary w-full rounded-md hover:bg-white hover:text-black"
+                        onClick={() =>
+                          handleKickUser(currentGame.appid, user.SteamUUID)
+                        }
+                      >
+                        Kick
+                      </button>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                );
+              },
+            )}
+          </div>
+
+          <div className="mr-20">{currentLobby.lobbyname}</div>
         </div>
-
-        <div className="mr-20">{currentLobby.lobbyname}</div>
-
-        
       </div>
     </div>
   );

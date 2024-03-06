@@ -4,10 +4,6 @@ import { Link, useLocation } from 'react-router-dom';
 import React, { FocusEvent, FormEvent, useRef, useState } from 'react';
 import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl, steamOpenIdEndpointUrl } from '../utilities';
 import { useAuth } from '../context/AuthContext';
-import { Tooltip, Button } from "flowbite-react";
-import { Dialog, Transition } from '@headlessui/react'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
-import { Modal } from './Modal';
 
 
 export default function Header({currentGame, setCurrentGame}) {
