@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { defaultAvatarFull } from "../utilities";
 import { useAuth } from "../context/AuthContext";
-import { Tooltip } from "flowbite-react";
+import { Tooltip, Button, Modal } from "flowbite-react";
 
 export const LobbyHeader = ({
   currentGame,
@@ -53,7 +53,7 @@ export const LobbyHeader = ({
           {Object.values(currentLobby?.lobbyusers).map((user, index) => (
             <div className="flex flex-col items-center mx-2" key={index}>
               <a
-                href={`https://steamcommunity.com/profiles/${user}`}
+                href={`https://steamcommunity.com/profiles/${user.SteamUUID}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -86,11 +86,7 @@ export const LobbyHeader = ({
 
         <div className="mr-20">{currentLobby.lobbyname}</div>
 
-        {currentLobby.leader === getUser().personaname ? (
-          <button>Lobby Settings</button>
-        ) : (
-          <button>Settings</button>
-        )}
+        
       </div>
     </div>
   );

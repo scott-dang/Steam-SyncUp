@@ -15,10 +15,10 @@ import { Lobby } from "../utilities";
 export const LobbiesList = ({
   currentGame,
   currentLobbyList,
-  handleCreateLobby,
   handleMyLobby,
   handleJoinLobby,
   handleLeaveLobby,
+  setModalState
 }) => {
   const { getUser } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -37,12 +37,13 @@ export const LobbiesList = ({
       </h2>
 
       <div className="flex items-center justify-center">
-        <button
+        <button 
+          onClick={() => setModalState(true)}
           className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full"
-          onClick={handleCreateLobby}
         >
           Create Lobby
         </button>
+        
         <button
           className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full"
           onClick={handleMyLobby}
