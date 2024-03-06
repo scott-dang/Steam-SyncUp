@@ -21,6 +21,7 @@ export default function LandingBoxes({ setCurrentGame }) {
                             className='hover:border hover:border-white hover:scale-110 duration-150 rounded-xl'
                             src={imageUrl}
                             onError={handleImageError}
+														alt={`${game.name} game avatar.`}
                         />
 												</Link>
                     )
