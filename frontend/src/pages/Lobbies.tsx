@@ -15,7 +15,7 @@ import { GamesList } from "../components/GamesList"
 import { LobbiesList } from "../components/LobbiesList"
 import { ChatArea, InputBox } from "../components/Chat.tsx"
 import { LobbyHeader } from "../components/LobbyHeader.tsx"
-import { AlertModal, Modal } from "../components/Modal.tsx";
+import { AlertModal, Modal, NotificationModal } from "../components/Modal.tsx";
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -30,7 +30,8 @@ export default function Lobbies({ game }) {
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
   const [modalState, setModalState] = useState(false)
-  const cancelButtonRef = useRef(null)
+
+  const [notificationLeaveModalState, setNotificationLeaveModalState] = useState(false)
 
   const [currentLobbyNameInput, setCurrentLobbyNameInput] = useState<string>("");
   const handleCurrentLobbyNameInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,16 +169,9 @@ export default function Lobbies({ game }) {
     }
     
     try {
-      const createLobbyServiceEndpointURL: URL = new URL("https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/CreateLobby")
-      createLobbyServiceEndpointURL.searchParams.set("game", gameId.toString())
-      createLobbyServiceEndpointURL.searchParams.set("name", currentLobbyName)
-      createLobbyServiceEndpointURL.searchParams.set("maxusers", maxusers)
-
-      console.log("Creating lobby")
-      setCurrentLobbyNameInput("")
-      setCurrentLobbySizeInput(1)
-      
+      const createLobbyServiceEndpointURL: URL = new URL(`https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/CreateLobby?game=${gameId.toString()}&name=${currentLobbyName}&maxusers=${maxusers}`)
       const resp = await fetch(createLobbyServiceEndpointURL, {
+
       headers: {
           "authorization": "Bearer " + getAuthToken(),
       }
@@ -185,7 +179,6 @@ export default function Lobbies({ game }) {
 
       // Refresh lobbies list upon success
       if (resp.ok) {
-          console.log("Lobby creation success!")
           await fetchLobbies(gameId)
       }
       
@@ -246,6 +239,10 @@ export default function Lobbies({ game }) {
         });
 
         if (response.ok && currentGame) {
+          setNotificationLeaveModalState(true);
+          setTimeout(() => {
+            setNotificationLeaveModalState(false);
+          }, 2000)
           await fetchLobbies(currentGame.appid);
         }
       } catch (err) {
@@ -303,15 +300,6 @@ export default function Lobbies({ game }) {
         )}
       </div>
 
-      {/* Handles Create Lobby Form. */}
-      {/* {showCreateForm && (
-        <CreateLobbyForm
-          onClose={handleCreateLobby}
-          gameId={currentGame?.appid}
-          fetchLobbies={fetchLobbies}
-        />
-      )} */}
-
       <Modal 
         onSave={() => handleCreateLobby(currentGame?.appid, currentLobbyNameInput, currentLobbySizeInput)}
         onCancel={() => {
@@ -320,7 +308,6 @@ export default function Lobbies({ game }) {
         }}
         modalState={modalState}
         setModalState={setModalState}
-        cancelButtonRef={cancelButtonRef}
         modalContent={(
         <div className='flex flex-col justify-center'>
           <h1 className='mb-5 text-center text-xl'>
@@ -359,6 +346,14 @@ export default function Lobbies({ game }) {
       modalContent="This is an alert!"
       >
       </AlertModal> */}
+
+      <NotificationModal 
+        modalState={notificationLeaveModalState}
+        setModalState={setNotificationLeaveModalState}
+        cancelButtonRef={undefined}
+        modalHeader={"Left"}
+        modalContent={"You have left a lobby!"} 
+      />
     </div>
   );
 }
