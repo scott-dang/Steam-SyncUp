@@ -73,9 +73,9 @@ function Information() {
 						but can also provide challenges for finding common games
 						among friends. Steam SyncUp aims to be the place where
 						gamers can find common ground so that no gamer has to
-						play alone. Whether you need a 4th or are looking to
-						build a community around a niche title, Steam SyncUp has
-						you covered!
+						play alone. Whether you need a 4th player or are looking
+						to build a community around a niche title, Steam SyncUp
+						has you covered!
 					</p>
 				</div>
 			</div>
