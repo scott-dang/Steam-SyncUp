@@ -36,6 +36,9 @@ export default function Lobbies({ game }) {
 
   const [currentLobbyNameInput, setCurrentLobbyNameInput] =
     useState<string>("");
+
+  const [notificationStillInLobbyModalState, setNotificationStillInLobbyModalState] = useState(false)
+  
   const handleCurrentLobbyNameInput = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -184,6 +187,10 @@ export default function Lobbies({ game }) {
       return;
     }
 
+    if (currentLobby) {
+      setNotificationStillInLobbyModalState(true)
+    }
+
     try {
       const createLobbyServiceEndpointURL: URL = new URL(
         `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/CreateLobby?game=${gameId.toString()}&name=${currentLobbyName}&maxusers=${maxusers}`,
@@ -225,6 +232,12 @@ export default function Lobbies({ game }) {
     gameId: number | null,
     lobbyLeader: string | null,
   ) => {
+
+    if (currentLobby) {
+      setNotificationStillInLobbyModalState(true);
+      return;
+    }
+
     if (gameId && lobbyLeader) {
       const url: string = `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/JoinLobby?game=${gameId.toString()}&leader=${lobbyLeader.toString()}`;
 
@@ -367,8 +380,16 @@ export default function Lobbies({ game }) {
         modalState={notificationLeaveModalState}
         setModalState={setNotificationLeaveModalState}
         cancelButtonRef={undefined}
-        modalHeader={"Left"}
+        modalHeader={"Left!"}
         modalContent={"You have left a lobby!"}
+      />
+
+      <NotificationModal
+        modalState={notificationStillInLobbyModalState}
+        setModalState={setNotificationStillInLobbyModalState}
+        cancelButtonRef={undefined}
+        modalHeader={"Error!"}
+        modalContent={"You must leave your current lobby to join another!"}
       />
     </div>
   );
