@@ -273,6 +273,7 @@ export default function Lobbies({ game }) {
           handleJoinLobby={handleJoinLobby}
           handleLeaveLobby={handleLeaveLobby}
           setModalState={setModalState}
+          currentLobby={currentLobby}
         />
 
         {/* Chat area space containing the scrolling chat area, and input box. */}

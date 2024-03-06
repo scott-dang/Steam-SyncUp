@@ -18,7 +18,8 @@ export const LobbiesList = ({
   handleMyLobby,
   handleJoinLobby,
   handleLeaveLobby,
-  setModalState
+  setModalState,
+  currentLobby
 }) => {
   const { getUser } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -90,7 +91,8 @@ export const LobbiesList = ({
                       Join
                     </button>
                   )}
-                  <button
+                  {lobby === currentLobby && (
+                    <button
                     className="bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2"
                     onClick={() => {
                       handleLeaveLobby(currentGame.appid, lobby.leader);
@@ -98,6 +100,7 @@ export const LobbiesList = ({
                   >
                     Leave
                   </button>
+                  )}
                   <p className="ml-2">{`${Object.keys(lobby.lobbyusers).length} / ${lobby.maxusers}`}</p>
                 </div>
               </div>
