@@ -124,10 +124,12 @@ export default function Lobbies({ game }) {
 
   // Updates messages based on fetched message history
   useEffect(() => {
-    if (currentGame && currentLobbyList && currentLobby) {
-      setMessages(mergeFullMessageHistory([...currentLobby.messages]));
-    } else {
-      setMessages([]);
+    if (!isOpen) {
+      if (currentGame && currentLobbyList && currentLobby) {
+        setMessages(mergeFullMessageHistory([...currentLobby.messages]));
+      } else {
+        setMessages([]);
+      }
     }
   }, [currentLobby, currentGame, currentLobbyList]);
 
