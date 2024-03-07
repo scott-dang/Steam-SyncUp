@@ -87,10 +87,11 @@ export default function Lobbies({ game }) {
     fetchGames();
   });
 
-  // TODO: Stick chat scroll to bottom if within threshold, else keep current position
+  // Stick to bottom if scroll is <= 30%, else keep current scroll position
   useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    const curChatRef = chatRef.current;
+    if (curChatRef && Math.abs(curChatRef.scrollTop / (curChatRef.scrollHeight - curChatRef.clientHeight)) * 100 <= 30) {
+      curChatRef.scrollTop = curChatRef.scrollHeight;
     }  
   }, [messages]);
 
@@ -107,16 +108,15 @@ export default function Lobbies({ game }) {
     if (currentGame) {
       fetchLobbies(currentGame.appid);
 
-      // TODO: Make the refresh polling independent of messages
-      // timer = setInterval(() => {
-      //   if (currentGame) {
-      //     const currentScrollPos = chatRef.current?.scrollTop;
-      //     fetchLobbies(currentGame.appid);
-      //     if (chatRef.current && currentScrollPos) {
-      //       chatRef.current.scrollTop = currentScrollPos;
-      //     }
-      //   }
-      // }, 5000);
+      timer = setInterval(() => {
+        if (currentGame) {
+          const currentScrollPos = chatRef.current?.scrollTop;
+          fetchLobbies(currentGame.appid);
+          if (chatRef.current && currentScrollPos) {
+            chatRef.current.scrollTop = currentScrollPos;
+          }
+        }
+      }, 5000);
     }
 
     return () => clearTimeout(timer);
@@ -145,7 +145,6 @@ export default function Lobbies({ game }) {
 
         if (response.ok) {
           setCurrentLobbyList(data);
-          setMessages([]);
         }
       } catch (err) {
         console.error(err);
