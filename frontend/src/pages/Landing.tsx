@@ -43,6 +43,15 @@ function Landing({ setCurrentGame }) {
 					},
 				]}
 			/>
+			<a
+				href="https://docs.google.com/document/d/16ZKvk1gUsPEMMZL2Fxnd2xqHBqONX7bYJU1QoblGry0"
+				target="_blank"
+				rel="noreferrer"
+				className="absolute bottom-10 w-full text-center text-white"
+			>
+				Steam accounts must have public game details. Click here for
+				more information.
+			</a>
 		</div>
 	);
 }
