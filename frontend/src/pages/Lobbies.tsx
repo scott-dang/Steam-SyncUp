@@ -105,7 +105,6 @@ export default function Lobbies({ game }) {
   // Updates messages based on fetched message history
   useEffect(() => {
     if (currentGame && currentLobbyList && currentLobby) {
-      console.log([...currentLobby.messages])
       setMessages(mergeFullMessageHistory([...currentLobby.messages]));
     } else {
       setMessages([]);
