@@ -416,8 +416,62 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 	}
 
 	// delete the lobby if the owner is leaving
-
 	if user.SteamUUID == leader {
+
+    // Get all steam ids of the users in the lobby
+    response, err := client.GetItem(context, &dynamodb.GetItemInput{
+      TableName: aws.String("Lobbies"),
+			Key: map[string]types.AttributeValue{
+				"appid":  &types.AttributeValueMemberN{Value: game},
+				"leader": &types.AttributeValueMemberS{Value: leader},
+			},
+    })
+
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, err
+		}
+
+    lobbyUsersAttr, found := response.Item["lobbyusers"]
+
+    if !found {
+      fmt.Println("No lobby users found")
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, err
+    }
+
+    lobbyUsers, ok := lobbyUsersAttr.(*types.AttributeValueMemberM)
+
+    if !ok {
+      fmt.Println("Could not cast lobbyUsers Attr into Set")
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+			}, err
+    }
+
+    // Remove the lobby from all the user profiles in the lobby (incl. leader)
+    for lobbyUserUUID := range lobbyUsers.Value {
+      userInput := &dynamodb.UpdateItemInput{
+        TableName: aws.String("Users"),
+        Key: map[string]types.AttributeValue{
+          "SteamUUID": &types.AttributeValueMemberS{Value: lobbyUserUUID},
+        },
+        UpdateExpression: aws.String("REMOVE LobbyGame, LobbyLeader"),
+      }
+
+      _, err = client.UpdateItem(context, userInput)
+
+      if err != nil {
+        fmt.Println("Error deleting lobby from user(s) when leader has left")
+        return events.APIGatewayProxyResponse{
+          StatusCode: http.StatusInternalServerError,
+        }, err
+      }
+    }
+
+    // Delete the lobby item
 		_, err = client.DeleteItem(context, &dynamodb.DeleteItemInput{
 			TableName: aws.String("Lobbies"),
 			Key: map[string]types.AttributeValue{
@@ -429,13 +483,12 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
-				Body:       "{ \"error\": \"" + err.Error() + "\" }",
-			}, nil
+			}, err
 		}
 	} else {
 
-		// remove the user from the lobby
-		lobbyInput := &dynamodb.UpdateItemInput{
+    // Remove the user from the lobby
+    lobbyInput := &dynamodb.UpdateItemInput{
 			TableName: aws.String("Lobbies"),
 			Key: map[string]types.AttributeValue{
 				"appid":  &types.AttributeValueMemberN{Value: game},
@@ -454,23 +507,23 @@ func handleLeaveLobby(context context.Context, request events.APIGatewayProxyReq
 				StatusCode: http.StatusInternalServerError,
 			}, err
 		}
-	}
 
-	// remove the lobby from the user profile
-	userInput := &dynamodb.UpdateItemInput{
-		TableName: aws.String("Users"),
-		Key: map[string]types.AttributeValue{
-			"SteamUUID": &types.AttributeValueMemberS{Value: user.SteamUUID},
-		},
-		UpdateExpression: aws.String("REMOVE LobbyGame, LobbyLeader"),
-	}
+    // remove the lobby from the non-leader user profile
+    userInput := &dynamodb.UpdateItemInput{
+      TableName: aws.String("Users"),
+      Key: map[string]types.AttributeValue{
+        "SteamUUID": &types.AttributeValueMemberS{Value: user.SteamUUID},
+      },
+      UpdateExpression: aws.String("REMOVE LobbyGame, LobbyLeader"),
+    }
 
-	_, err = client.UpdateItem(context, userInput)
+    _, err = client.UpdateItem(context, userInput)
 
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-		}, err
+    if err != nil {
+      return events.APIGatewayProxyResponse{
+        StatusCode: http.StatusInternalServerError,
+      }, err
+    }
 	}
 
 	return events.APIGatewayProxyResponse{
