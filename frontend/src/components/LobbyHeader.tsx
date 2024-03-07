@@ -53,7 +53,7 @@ export const LobbyHeader = ({
           {Object.values(currentLobby?.lobbyusers).map((user, index) => (
             <div className="flex flex-col items-center mx-2" key={index}>
               <a
-                href={`https://steamcommunity.com/profiles/${user}`}
+                href={`https://steamcommunity.com/profiles/${user.SteamUUID}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -89,7 +89,7 @@ export const LobbyHeader = ({
         {currentLobby.leader === getUser().personaname ? (
           <button>Lobby Settings</button>
         ) : (
-          <button>Settings</button>
+          <button>Refresh</button>
         )}
       </div>
     </div>

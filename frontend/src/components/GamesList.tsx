@@ -25,7 +25,7 @@ export const GamesList = ({ gameResults, currentGame, handleCurrentGame }) => {
           gameResults.map((game: Game) => (
             <li
               key={game.appid}
-              className="font-normal rounded-xl mb-5 mx-2"
+              className="font-normal rounded-xl mb-5 mx-2 cursor-pointer"
               style={{
                 backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg)`,
                 backgroundSize: "cover",

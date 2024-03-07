@@ -5,6 +5,7 @@ import React, { FocusEvent, FormEvent, useState } from 'react';
 import { fetchGamesServiceAPI, Game, GamesServiceResponse, getGameImageUrl, steamOpenIdEndpointUrl } from '../utilities';
 import { useAuth } from '../context/AuthContext';
 
+
 export default function Header({currentGame, setCurrentGame}) {
 
   const { getUser, getAuthToken, isLoggedIn, setupUser, logout } = useAuth();
