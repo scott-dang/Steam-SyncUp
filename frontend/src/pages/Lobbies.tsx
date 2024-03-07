@@ -125,6 +125,7 @@ export default function Lobbies({ game }) {
 
         if (response.ok) {
           setCurrentLobbyList(data);
+          setMessages([]);
         }
       } catch (err) {
         console.error(err);
