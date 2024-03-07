@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -55,7 +56,7 @@ func CreateUserToken(uuid string, context context.Context) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString([]byte("mySecret"))
+	tokenString, err := token.SignedString([]byte(os.Getenv("AUTH_SECRET")))
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +97,7 @@ func Authenticate_Websocket(request events.APIGatewayWebsocketProxyRequest, cont
 
 func GetUserFromToken(tokenString string, context context.Context) (model.User, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("mySecret"), nil
+		return []byte(os.Getenv("AUTH_SECRET")), nil
 	})
 	if err != nil {
 		return model.User{}, err
