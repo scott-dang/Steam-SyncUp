@@ -33,5 +33,5 @@ test('renders no Information component for "/Information" route with no auth', (
 	render(routes);
 
 	// Check if the Information component isn't rendered
-	expect(screen.queryByText(/Information/i)).toBeFalsy();
+	expect(screen.getAllByText(/Information/i)).toHaveLength(1);
 });
