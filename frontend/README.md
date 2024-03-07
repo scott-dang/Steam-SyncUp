@@ -35,6 +35,8 @@ For our frontend test cases, we use assertions to test rendering of components.
 
 For additional details and specifics for writing tests for each "common" case, refer to Jest docs here: [text](https://jestjs.io/). 
 
+To create a new test, create a file for the component you want to test if it does not exist already. Add test cases by calling the test() function for each new test case.
+
 ### Other
 
 Do not install typescript-estree/typescript-eslint, it is incompatible with this version of TypeScript.
