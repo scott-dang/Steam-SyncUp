@@ -14,12 +14,15 @@
 - **go.mod** and **go.sum**: Go module files for handling project dependencies.
 
 ## Deploying
+In AWS we have one Lambda function for each service. If you change a service, be sure to update the corresponding Lambda function. If you add a new service, be sure to create a new Lambda function.
+
 Use the following command to deploy AWS Lambda functions to production:
+
 env GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./bin/authservice/bootstrap ./cmd/authservice/main.go && 7z a -tzip ./bin/authservice/main.zip ./bin/authservice/bootstrap && aws lambda update-function-code --function-name AuthService --region us-west-2 --zip-file fileb://.//bin/authservice/main.zip
 
 Modify the paths and function name to reflect the Lambda function you want to update. The example is for Auth Service.
 
-You must have AWS CLI installed to run the command, and Windows you need 7-Zip to run the command.
+You must have AWS CLI installed to run the command, and in Windows you need 7-Zip to run the command.
 
 
 ## Testing
