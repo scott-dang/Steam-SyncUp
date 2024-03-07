@@ -1,6 +1,5 @@
 import "../App.css";
 import Header from "../components/Header";
-import CreateLobbyForm from "../components/CreateLobbyForm";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchUsersServiceAPI,
@@ -14,10 +13,11 @@ import {
 } from "../utilities";
 import { useAuth } from "../context/AuthContext";
 import useLobbySocket from "../hooks/useLobbySocket";
-import { GamesList } from "../components/GamesList"
-import { LobbiesList } from "../components/LobbiesList"
-import { ChatArea, InputBox } from "../components/Chat"
-import { LobbyHeader } from "../components/LobbyHeader"
+import { GamesList } from "../components/GamesList";
+import { LobbiesList } from "../components/LobbiesList";
+import { ChatArea, InputBox } from "../components/Chat";
+import { LobbyHeader } from "../components/LobbyHeader";
+import { Modal, NotificationModal } from "../components/Modal";
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -30,8 +30,29 @@ export default function Lobbies({ game }) {
   const [messages, setMessages] = useState<ReceivedMessage[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [currentLobbyList, setCurrentLobbyList] = useState<Lobby[]>([]);
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const [modalState, setModalState] = useState(false);
+
+  const [notificationLeaveModalState, setNotificationLeaveModalState] =
+    useState(false);
+
+  const [currentLobbyNameInput, setCurrentLobbyNameInput] =
+    useState<string>("");
+
+  const [notificationStillInLobbyModalState, setNotificationStillInLobbyModalState] = useState(false)
+  
+  const handleCurrentLobbyNameInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setCurrentLobbyNameInput(e.target.value);
+  };
+
+  const [currentLobbySizeInput, setCurrentLobbySizeInput] = useState<number>(1);
+  const handleCurrentLobbySizeInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setCurrentLobbySizeInput(e.target.valueAsNumber);
+  };
 
   const user = getUser();
 
@@ -82,7 +103,6 @@ export default function Lobbies({ game }) {
   }, [gameResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-
     let timer: NodeJS.Timeout;
     if (currentGame) {
       fetchLobbies(currentGame.appid);
@@ -160,17 +180,60 @@ export default function Lobbies({ game }) {
   };
 
   // Handler to create a new lobby, then fetch and update lobbies.
-  const handleCreateLobby = async () => {
-    setShowCreateForm(!showCreateForm);
+  const handleCreateLobby = async (
+    gameId: number | null,
+    currentLobbyName: string,
+    maxusers: number,
+  ) => {
+    if (gameId === null) {
+      console.error("gameId is null. Cannot create lobby.");
+      return;
+    }
+
+    if (currentLobbyName === "") {
+      console.error("currentLobbyName is empty. Cannot create lobby.");
+      return;
+    }
+
+    if (maxusers < 1) {
+      console.error("maxusers is invalid. Cannot create lobby.");
+      return;
+    }
+
+    if (currentLobby) {
+      setNotificationStillInLobbyModalState(true)
+    }
+
+    try {
+      const createLobbyServiceEndpointURL: URL = new URL(
+        `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/CreateLobby?game=${gameId.toString()}&name=${currentLobbyName}&maxusers=${maxusers}`,
+      );
+      const resp = await fetch(createLobbyServiceEndpointURL, {
+        headers: {
+          authorization: "Bearer " + getAuthToken(),
+        },
+      });
+
+      // Refresh lobbies list upon success
+      if (resp.ok) {
+        await fetchLobbies(gameId);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleMyLobby = async () => {
     const resp = await fetchUsersServiceAPI(user.jwttoken);
 
     if (resp?.lobbygame) {
-      setCurrentGame(user.games.find(game => game.appid === Number(resp.lobbygame)) || currentGame || null)
+      setCurrentGame(
+        user.games.find((game) => game.appid === Number(resp.lobbygame)) ||
+          currentGame ||
+          null,
+      );
     }
-  }
+  };
 
   // Handler to set the current game when a different game is clicked.
   const handleCurrentGame = async (newGame: Game) => {
@@ -182,6 +245,12 @@ export default function Lobbies({ game }) {
     gameId: number | null,
     lobbyLeader: string | null,
   ) => {
+
+    if (currentLobby) {
+      setNotificationStillInLobbyModalState(true);
+      return;
+    }
+
     if (gameId && lobbyLeader) {
       const url: string = `https://hj6obivy5m.execute-api.us-west-2.amazonaws.com/default/JoinLobby?game=${gameId.toString()}&leader=${lobbyLeader.toString()}`;
 
@@ -216,6 +285,10 @@ export default function Lobbies({ game }) {
         });
 
         if (response.ok && currentGame) {
+          setNotificationLeaveModalState(true);
+          setTimeout(() => {
+            setNotificationLeaveModalState(false);
+          }, 2000);
           await fetchLobbies(currentGame.appid);
         }
       } catch (err) {
@@ -242,20 +315,20 @@ export default function Lobbies({ game }) {
         <LobbiesList
           currentGame={currentGame}
           currentLobbyList={currentLobbyList}
-          handleCreateLobby={handleCreateLobby}
           handleMyLobby={handleMyLobby}
           handleJoinLobby={handleJoinLobby}
           handleLeaveLobby={handleLeaveLobby}
+          setModalState={setModalState}
+          currentLobby={currentLobby}
         />
 
         {/* Chat area space containing the scrolling chat area, and input box. */}
         {currentGame && currentLobby && (
           <div className="flex flex-col flex-grow bg-grayprimary border border-graysecondary rounded-3xl w-fit">
-            
-            <LobbyHeader 
+            <LobbyHeader
               currentGame={currentGame}
               currentLobby={currentLobby}
-              fetchLobbies={fetchLobbies}        
+              fetchLobbies={fetchLobbies}
               getAuthToken={getAuthToken}
             />
 
@@ -273,14 +346,62 @@ export default function Lobbies({ game }) {
         )}
       </div>
 
-      {/* Handles Create Lobby Form. */}
-      {showCreateForm && (
-        <CreateLobbyForm
-          onClose={handleCreateLobby}
-          gameId={currentGame?.appid}
-          fetchLobbies={fetchLobbies}
-        />
-      )}
+      <Modal
+        onSave={() =>
+          handleCreateLobby(
+            currentGame?.appid || null,
+            currentLobbyNameInput,
+            currentLobbySizeInput,
+          )
+        }
+        onCancel={() => {
+          setCurrentLobbyNameInput("");
+          setCurrentLobbySizeInput(1);
+        }}
+        modalState={modalState}
+        setModalState={setModalState}
+        modalContent={
+          <div className="flex flex-col justify-center">
+            <h1 className="mb-5 text-center text-xl">
+              <b>Create a lobby</b>
+            </h1>
+            <div className="flex flex-row">
+              <div className="flex flex-col">
+                <p className="my-3">Lobby Name:</p>
+                <p className="my-3 mt-4">Max users:</p>
+              </div>
+
+              <div className="flex flex-col">
+                <input
+                  className="bg-graysecondary my-2 rounded-md p-2 ml-5 focus:outline-none focus:ring-0 focus:border-gray-900"
+                  onChange={handleCurrentLobbyNameInput}
+                ></input>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  onChange={handleCurrentLobbySizeInput}
+                  className="bg-graysecondary rounded-md p-2 ml-5 focus:outline-none focus:ring-0 focus:border-gray-900"
+                ></input>
+              </div>
+            </div>
+          </div>
+        }
+      />
+
+      <NotificationModal
+        modalState={notificationLeaveModalState}
+        setModalState={setNotificationLeaveModalState}
+        modalHeader={"Left!"}
+        modalContent={"You have left a lobby!"}
+      />
+
+      <NotificationModal
+        modalState={notificationStillInLobbyModalState}
+        setModalState={setNotificationStillInLobbyModalState}
+        modalHeader={"Error!"}
+        modalContent={"You must leave your current lobby to join another!"}
+      />
     </div>
   );
 }

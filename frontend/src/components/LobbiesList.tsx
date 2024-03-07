@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Lobby } from "../utilities";
+import { Game, Lobby } from "../utilities";
 
 /**
  * Function component for a list of lobbies.
@@ -10,18 +10,22 @@ import { Lobby } from "../utilities";
  * @param handleCreateLobby A handler callback function to create a lobby.
  * @param handleJoinLobby A handler callback function to join a lobby.
  * @param handleLeaveLobby A handler callback function to leave a lobby.
+ * @param currentLobby The current lobby the user is in.
  * @returns A list of public lobbies given a specific game.
  */
 export const LobbiesList = ({
   currentGame,
   currentLobbyList,
-  handleCreateLobby,
   handleMyLobby,
   handleJoinLobby,
   handleLeaveLobby,
+  setModalState,
+  currentLobby
 }) => {
   const { getUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchResults, setSearchResults] = useState<Lobby[]>([])
 
   useEffect(() => {
     setLoading(true);
@@ -30,19 +34,68 @@ export const LobbiesList = ({
     }, 200);
   }, [currentLobbyList]);
 
+  const onSearchChange = (currentInput: string) => {
+
+    setSearchInput(currentInput);
+  
+    if (currentInput.length > 0) {
+      try {
+        const searchResults: Lobby[] = currentLobbyList;
+        setSearchResults(searchResults.filter(
+          lobby => lobby.lobbyname.toLowerCase().startsWith(currentInput.toLowerCase())
+        ));
+      } catch (err) {
+        setSearchResults([]);
+        console.error(err);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  }
+
+  const onSearchResultMouseDown = (currentGame: Game, lobby: Lobby) => {
+    // Close the dropdown when clicking on a game from the dropdown
+    setSearchResults([]);
+    if (!currentLobby) {
+      handleJoinLobby(currentGame.appid, lobby.leader);
+    } else if (currentLobby && currentLobby !== lobby) {
+      handleLeaveLobby(currentLobby.appid, currentLobby.leader)
+      setTimeout(() => {
+        handleJoinLobby(currentGame.appid, lobby.leader)
+        
+      }, 500);
+      
+    }
+  }
+
+  const onSearchFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.placeholder = "Search for a lobby";
+
+    // Reopen the dropdown with current input
+    onSearchChange(e.target.value);
+  }
+
+  const onSearchBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.placeholder = "Search";
+
+    // Close dropdown when clicking outside dropdown
+    setSearchResults([]);
+  }
+
   return (
     <div className="bg-grayprimary w-1/6 text-xl font-bold border border-graysecondary rounded-3xl">
       <h2 className="p-2 m-2 rounded-xl bg-graysecondary text-center">
         Lobbies
       </h2>
-
+      
       <div className="flex items-center justify-center mb-2">
-        <button
+        <button 
+          onClick={() => setModalState(true)}
           className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full"
-          onClick={handleCreateLobby}
         >
           Create Lobby
         </button>
+        
         <button
           className="text-white text-xs bg-transparent border border-white hover:bg-white hover:text-black rounded-xl mx-2 py-2 text-center focus:outline-none w-full"
           onClick={handleMyLobby}
@@ -51,6 +104,34 @@ export const LobbiesList = ({
         </button>
       </div>
 
+      <form method="get" className="mx-2 py-1 text-sm">
+          <input
+            className="w-full text-white text-2l bg-transparent border border-white rounded-md text-center focus:outline-none"
+            type="text"
+            placeholder="Search"
+            style={{ color: "white" }}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onFocus={onSearchFocus}
+            onBlur={onSearchBlur}
+            value={searchInput}
+          />
+          <input type="submit" hidden/>
+      </form>
+      {searchResults.length > 0 && (
+              // Searchbar dropdown
+              <div className="absolute w-1/6 z-10 bg-graysecondary rounded-3xl shadow-lg overflow-y-scroll max-h-[30vh]">
+                {searchResults.map((lobby: Lobby, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-row flex-wrap gap-x-2 px-4 py-2 text-white hover:bg-grayprimary cursor-pointer text-sm justify-between"
+                    onMouseDown={() => onSearchResultMouseDown(currentGame, lobby)}
+                  >
+                    <p>{lobby.lobbyname}</p>
+                    <p className="ml-2">{`${Object.keys(lobby.lobbyusers).length} / ${lobby.maxusers}`}</p>
+                  </div>
+                ))}
+              </div>
+            )}
       {/* Renders the lobbies list with a refresh indicator at the bottom when loading or not loading*/}
       <ul>
           {currentLobbyList.map((lobby: Lobby, index: number) => (
@@ -68,7 +149,8 @@ export const LobbiesList = ({
                       Join
                     </button>
                   )}
-                  <button
+                  {lobby === currentLobby && (
+                    <button
                     className="bg-transparent border border-white rounded-xl hover:bg-white hover:text-black px-4 py-1 text-center focus:outline-none ml-2"
                     onClick={() => {
                       handleLeaveLobby(currentGame.appid, lobby.leader);
@@ -76,6 +158,7 @@ export const LobbiesList = ({
                   >
                     Leave
                   </button>
+                  )}
                   <p className="ml-2">{`${Object.keys(lobby.lobbyusers).length} / ${lobby.maxusers}`}</p>
                 </div>
               </div>

@@ -8,9 +8,8 @@ Steam SyncUp enables users to find and join a game community, tailored to their 
 ## Check it out here
 Link to website: https://main.d25wlrzzqu2q9m.amplifyapp.com
 
-<img src="https://github.com/scott-dang/Steam-SyncUp/assets/51427024/224735b2-3610-459a-b81d-a38b9aa6607a" width="49%" height="50%"/>
-<span> </span>
-<img src="https://github.com/scott-dang/Steam-SyncUp/assets/51427024/94f2d460-ff8e-4618-a58d-2874d422c27d" width="49%" height="50%"/>
+![SyncUp Landing](https://github.com/scott-dang/Steam-SyncUp/assets/40500077/639aed94-c8c4-4461-990b-8a5e6691f787)
+![SyncUp Lobbies](https://github.com/scott-dang/Steam-SyncUp/assets/40500077/eb2f8a62-b84e-4a6d-aaf2-0f76ebe867d9)
 
 ## Requirements
 A modern web browser with stable internet connection is needed along with a Steam account that has _game details_ set to public.
