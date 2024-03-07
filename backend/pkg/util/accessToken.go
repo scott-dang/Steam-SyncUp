@@ -100,6 +100,7 @@ func GetUserFromToken(tokenString string, context context.Context) (model.User, 
 		return []byte(os.Getenv("AUTH_SECRET")), nil
 	})
 	if err != nil {
+		fmt.Println("Error retrieving user from token")
 		return model.User{}, err
 	} else if claims, ok := token.Claims.(*UserClaims); ok {
 		uuid := claims.UUID

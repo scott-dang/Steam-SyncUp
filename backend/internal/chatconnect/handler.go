@@ -45,19 +45,6 @@ func Handler(context context.Context, request events.APIGatewayWebsocketProxyReq
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
 	}
 
-	resp, err := svc.GetItem(context, &dynamodb.GetItemInput{
-		TableName: aws.String("Connections"),
-		Key: map[string]types.AttributeValue{
-			"leader": &types.AttributeValueMemberS{Value: leader},
-			"appid":  &types.AttributeValueMemberN{Value: appid},
-		},
-	})
-
-	if len(resp.Item) == 0 {
-		fmt.Println("Error finding client specified lobby to connect to")
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
-	}
-
 	_, err = svc.PutItem(context, &dynamodb.PutItemInput{
 		TableName: aws.String("Connections"),
 		Item: map[string]types.AttributeValue{
