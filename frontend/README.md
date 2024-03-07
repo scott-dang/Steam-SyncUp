@@ -24,7 +24,16 @@ Run `npm test` to run testing.
 
 Testing files are within the ./src/\_\_tests\_\_ directory.
 
-Tests should be named with the convention "<filename>.test.ts".
+Tests should be named with the convention "<filename>.test.ts". 
+
+Each test file should contain test cases that refer to one singular component on the frontend. 
+
+A test case should be as minimal as possible and should have a clear and concise name detailing what 
+it is testing. 
+
+For our frontend test cases, we use assertions to test rendering of components. 
+
+For additional details and specifics for writing tests for each "common" case, refer to Jest docs here: [text](https://jestjs.io/). 
 
 ### Other
 
