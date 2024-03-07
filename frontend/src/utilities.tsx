@@ -147,6 +147,42 @@ export const getCurrentLobby = (currentGame: Game | null, currentLobbyList: Lobb
   return undefined;
 }
 
+export const mergeFullMessageHistory = (messages: ReceivedMessage[]): ReceivedMessage[] => { 
+  let newMessages: ReceivedMessage[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    newMessages = mergeIncomingMessage(newMessages, messages[i]);
+  }
+  return newMessages;
+}
+
+export const mergeIncomingMessage = (messages: ReceivedMessage[], newMessage: ReceivedMessage): ReceivedMessage[] => {
+  const newMessageHistory: ReceivedMessage[] = messages;
+  const prevMessage = messages.at(-1);
+
+  if (prevMessage && prevMessage.suid === newMessage.suid) {
+    const prevMessageDate = new Date(prevMessage.mergetimestamp || +prevMessage.timestamp);
+    const newMessageDate = new Date(newMessage.mergetimestamp || +newMessage.timestamp);
+    if (getMinDiffInDates(newMessageDate, prevMessageDate) <= 5) {
+      const newMessageCpy: ReceivedMessage = {
+        ...prevMessage, 
+        mergetimestamp: +newMessage.timestamp,
+        text: prevMessage.text + "\n" + newMessage.text,
+      };
+
+      if (newMessageHistory.length > 0) {
+        newMessageHistory[newMessageHistory.length - 1] = newMessageCpy;
+        return newMessageHistory;
+      }
+    }
+  }
+  newMessageHistory.push({...newMessage});
+  return newMessageHistory;
+}
+
+const getMinDiffInDates = (a: Date, b: Date) => {
+  return Math.floor(Math.abs(a.getTime() - b.getTime())/(1000*60));
+}
+
 export const getDateString = (date: Date): string => {
   const timeString = date.toLocaleTimeString([], {
     hour: "numeric",
@@ -169,7 +205,7 @@ export interface Lobby {
   lobbyname: string,
   lobbyusers: LobbyUsers,
   appid: number,
-  messages: string[],
+  messages: ReceivedMessage[],
 }
 
 export interface LobbyUsers {
@@ -188,6 +224,7 @@ export interface ReceivedMessage {
   suid:         string,
   personaname:  string,
   timestamp:    number,
+  mergetimestamp: number | undefined,
   avatarfull:   string,
 }
 

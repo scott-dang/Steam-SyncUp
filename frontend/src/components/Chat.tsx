@@ -10,7 +10,7 @@ import { useAuth } from "../context/AuthContext";
  */
 export const ChatArea = ({ messages, chatRef }) => {
     const { getUser } = useAuth();
-  
+
     return (
       <div
         ref={chatRef}
@@ -50,11 +50,30 @@ export const ChatArea = ({ messages, chatRef }) => {
                 {getDateString(new Date(+message.timestamp))}
               </div>
             </div>
-            <div className="bg-graysecondary px-3 py-2 rounded-3xl text-sm">
-              {message.text}
-            </div>
+            {message.text.split("\n").map((text: string, index: number, arr: string[]) => {
+              const isSingleMessage = arr.length === 1;
+              const baseStyle = "bg-graysecondary px-3 py-2 text-sm";
+              const topRounded = " rounded-t-3xl";
+              const bottomRounded = " rounded-b-3xl";
+
+              let style: string;
+
+              if(isSingleMessage) {
+                style = `${baseStyle}${topRounded}${bottomRounded}`;
+              } else if (index === 0) {
+                style = `${baseStyle}${topRounded}`;
+              } else if (index === arr.length - 1) {
+                style = `${baseStyle}${bottomRounded}`;
+              } else {
+                style = `${baseStyle}`;
+              }
+
+              return (<div className={style} key={index}>
+                {text}
+              </div>)
+            })}
           </div>
-        ))}
+        )).reverse()}
       </div>
     );
   };

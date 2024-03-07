@@ -1,11 +1,13 @@
 import "../App.css";
-import Header from "../components/Header.tsx";
+import Header from "../components/Header";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchUsersServiceAPI,
   Game,
   getCurrentLobby,
   Lobby,
+  mergeFullMessageHistory,
+  mergeIncomingMessage,
   ReceivedMessage,
   SendMessage,
 } from "../utilities";
@@ -13,9 +15,9 @@ import { useAuth } from "../context/AuthContext";
 import useLobbySocket from "../hooks/useLobbySocket";
 import { GamesList } from "../components/GamesList";
 import { LobbiesList } from "../components/LobbiesList";
-import { ChatArea, InputBox } from "../components/Chat.tsx";
-import { LobbyHeader } from "../components/LobbyHeader.tsx";
-import { Modal, NotificationModal } from "../components/Modal.tsx";
+import { ChatArea, InputBox } from "../components/Chat";
+import { LobbyHeader } from "../components/LobbyHeader";
+import { Modal, NotificationModal } from "../components/Modal";
 
 /**
  * This is the Lobbies page, where users can choose a game, lobby, and begin chatting with others.
@@ -85,11 +87,11 @@ export default function Lobbies({ game }) {
     fetchGames();
   });
 
-  // Updates the chat messages when new messages arrive.
+  // TODO: Stick chat scroll to bottom if within threshold, else keep current position
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
+    }  
   }, [messages]);
 
   // Sets the current game when game results are non-zero (first fetch).
@@ -105,11 +107,29 @@ export default function Lobbies({ game }) {
     if (currentGame) {
       fetchLobbies(currentGame.appid);
 
-      timer = setInterval(() => fetchLobbies(currentGame.appid), 5000);
+      // TODO: Make the refresh polling independent of messages
+      // timer = setInterval(() => {
+      //   if (currentGame) {
+      //     const currentScrollPos = chatRef.current?.scrollTop;
+      //     fetchLobbies(currentGame.appid);
+      //     if (chatRef.current && currentScrollPos) {
+      //       chatRef.current.scrollTop = currentScrollPos;
+      //     }
+      //   }
+      // }, 5000);
     }
 
     return () => clearTimeout(timer);
   }, [currentGame]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Updates messages based on fetched message history
+  useEffect(() => {
+    if (currentGame && currentLobbyList && currentLobby) {
+      setMessages(mergeFullMessageHistory([...currentLobby.messages]));
+    } else {
+      setMessages([]);
+    }
+  }, [currentLobby, currentGame, currentLobbyList]);
 
   const fetchLobbies = async (gameId: number | null) => {
     if (gameId) {
@@ -121,7 +141,7 @@ export default function Lobbies({ game }) {
           },
         });
 
-        const data = await response.json();
+        const data: Lobby[] = await response.json();
 
         if (response.ok) {
           setCurrentLobbyList(data);
@@ -133,16 +153,9 @@ export default function Lobbies({ game }) {
     }
   };
 
-  const handleOldMessages = (): string[] => {
-    if (isOpen && currentGame && currentLobbyList && currentLobby) {
-      return currentLobby.messages;
-    }
-    return [];
-  };
-
   // Add new message to chat area.
   const addMessage = (message: ReceivedMessage) => {
-    setMessages((prevMessages) => [...prevMessages, message]);
+    setMessages((prevMessages) => mergeIncomingMessage([...prevMessages], message));
   };
 
   // Handler for the text box input.
@@ -320,7 +333,7 @@ export default function Lobbies({ game }) {
             />
 
             <ChatArea
-              messages={[...handleOldMessages(), ...messages].reverse()}
+              messages={[...messages]}
               chatRef={chatRef}
             />
 
@@ -336,7 +349,7 @@ export default function Lobbies({ game }) {
       <Modal
         onSave={() =>
           handleCreateLobby(
-            currentGame?.appid,
+            currentGame?.appid || null,
             currentLobbyNameInput,
             currentLobbySizeInput,
           )
@@ -379,7 +392,6 @@ export default function Lobbies({ game }) {
       <NotificationModal
         modalState={notificationLeaveModalState}
         setModalState={setNotificationLeaveModalState}
-        cancelButtonRef={undefined}
         modalHeader={"Left!"}
         modalContent={"You have left a lobby!"}
       />
@@ -387,7 +399,6 @@ export default function Lobbies({ game }) {
       <NotificationModal
         modalState={notificationStillInLobbyModalState}
         setModalState={setNotificationStillInLobbyModalState}
-        cancelButtonRef={undefined}
         modalHeader={"Error!"}
         modalContent={"You must leave your current lobby to join another!"}
       />

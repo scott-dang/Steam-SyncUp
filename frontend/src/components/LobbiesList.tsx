@@ -104,7 +104,6 @@ export const LobbiesList = ({
         </button>
       </div>
 
-
       <form method="get" className="mx-2 py-1 text-sm">
           <input
             className="w-full text-white text-2l bg-transparent border border-white rounded-md text-center focus:outline-none"
@@ -133,8 +132,6 @@ export const LobbiesList = ({
                 ))}
               </div>
             )}
-
-
       {/* Renders the lobbies list with a refresh indicator at the bottom when loading or not loading*/}
       <ul>
           {currentLobbyList.map((lobby: Lobby, index: number) => (
