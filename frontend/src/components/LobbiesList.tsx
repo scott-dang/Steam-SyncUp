@@ -58,7 +58,7 @@ export const LobbiesList = ({
     setSearchResults([]);
     if (!currentLobby) {
       handleJoinLobby(currentGame.appid, lobby.leader);
-    } else if (currentLobby && currentLobby != lobby) {
+    } else if (currentLobby && currentLobby !== lobby) {
       handleLeaveLobby(currentLobby.appid, currentLobby.leader)
       setTimeout(() => {
         handleJoinLobby(currentGame.appid, lobby.leader)
