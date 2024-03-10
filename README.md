@@ -20,7 +20,7 @@ A modern web browser with stable internet connection is needed along with a Stea
 - See account's games
 - See logged in account's details in settings
 - Create lobbies
-- Send messages (currently just one messaging channel. More to come when more lobby management is integrated with frontend)
+- Send messages
 - Logout
 
 ## Local Installation
