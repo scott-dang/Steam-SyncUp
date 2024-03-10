@@ -16,11 +16,12 @@ A modern web browser with stable internet connection is needed along with a Stea
 
 ## Current functionality
 
-- Login with Steam (Must have public accout)
+- Login with Steam (Must have public account)
 - See account's games
 - See logged in account's details in settings
-- Create lobbies
-- Send messages
+- Lobby management
+- Chat messaging
+- Auto chat moderation
 - Logout
 
 ## Local Installation
